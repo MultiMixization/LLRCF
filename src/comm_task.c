@@ -156,7 +156,7 @@ void comm_task()
         uart_write_bytes(UART_PORT_NUM, outputFrame, strlen(outputFrame));
 
         xSemaphoreTake(SystemHandles.OpSysAccess, portMAX_DELAY);
-        while(uxQueueMessagesWaiting(SystemHandles.errorQueue)>0)
+        while(uxQueueMessagesWaiting(SystemHandles.errorQueue) > 0)
         {
             xQueueReceive(SystemHandles.errorQueue, &temp, portMAX_DELAY);
             sprintf(outputFrame, "ER;%s\n", esp_err_to_name(temp));

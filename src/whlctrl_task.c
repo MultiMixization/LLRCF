@@ -20,7 +20,7 @@ void whlctrl_task()
     };
     checkError(ledc_timer_config(&timer));
 
-    #ifndef ALTERNATIVE_CONTROL_SCHEME
+    #if CONTROL_SCHEME == 1
         ledc_channel_config_t left_motor = {
             .speed_mode     = LEDC_LOW_SPEED_MODE,
             .channel        = LEDC_CHANNEL_0,
@@ -42,9 +42,8 @@ void whlctrl_task()
             .hpoint         = 0
         };
         checkError(ledc_channel_config(&right_motor));
-    #endif
 
-    #ifdef ALTERNATIVE_CONTROL_SCHEME
+    #elif CONTROL_SCHEME == 2
         ledc_channel_config_t left_motor_forward = {
             .speed_mode     = LEDC_LOW_SPEED_MODE,
             .channel        = LEDC_CHANNEL_0,
@@ -89,6 +88,8 @@ void whlctrl_task()
         };
         checkError(ledc_channel_config(&right_motor_backwards));
 
+    #else
+        #error Incorrectly declared CONTROL_SCHEME
     #endif
 
     SystemHandles.whlctrl_last_wakeup = xTaskGetTickCount();
@@ -120,7 +121,7 @@ void whlctrl_task()
         if(right_error_integral >= PID_ERROR_LIMIT) right_error_integral = PID_ERROR_LIMIT;
         if(right_error_integral <= -PID_ERROR_LIMIT) right_error_integral = -PID_ERROR_LIMIT;
 
-        #ifndef ALTERNATIVE_CONTROL_SCHEME
+        #if CONTROL_SCHEME == 1
             if(left_ctrl_value > 0)
             {
                 gpio_set_level(LEFT_MOTOR_DIR, 0);
@@ -138,13 +139,12 @@ void whlctrl_task()
             {
                 gpio_set_level(RIGHT_MOTOR_DIR, 0);
             }
-        checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, abs(left_ctrl_value)));
-        checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, abs(right_ctrl_value)));
-        checkError(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0));
-        checkError(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1));
-        #endif
+            checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, abs(left_ctrl_value)));
+            checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, abs(right_ctrl_value)));
+            checkError(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0));
+            checkError(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1));
 
-        #ifdef ALTERNATIVE_CONTROL_SCHEME
+        #elif CONTROL_SCHEME == 2
             if(left_ctrl_value > 0)
             {
                 checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, 0));
