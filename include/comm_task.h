@@ -12,6 +12,9 @@
 #define UART_BAUD_RATE 115200
 #define BUFF_SIZE 128
 
+/*
+* @brief Task responsible for communication between the uC and controlling computer.
+*/
 void comm_task();
 
 #endif

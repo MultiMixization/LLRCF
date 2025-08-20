@@ -7,6 +7,9 @@
 
 #include "pinout.h"
 
+/*
+* @brief Task responsible for controling the movement system of the robot.
+*/
 void whlctrl_task();
 
 #endif

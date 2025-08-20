@@ -2,7 +2,7 @@
 
 extern RobotData mainDataStruct;
 extern RobotConstants constantsDataStruct;
-extern OpSyS SystemHandles;
+extern OpSys SystemHandles;
 
 void comm_task()
 {
@@ -39,22 +39,98 @@ void comm_task()
         frameLength = uart_read_bytes(UART_PORT_NUM, inputData, BUFF_SIZE-1, 20);
         if(frameLength > 0)
         {
-            if(strncmp(inputData, "RD;", 3) == 0)
+            if(strncmp(inputData, ROBOT_ID, 2) == 0)
             {
                 strncpy(cmd, inputData + 3, 3);
                 if(strcmp(cmd, "RST") == 0)
                 {
-                    sprintf(outputFrame, "Reseting ESP32...\n");
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Reseting ESP32...\n");
+                    #endif
                     uart_write_bytes(UART_PORT_NUM, outputFrame, strlen(outputFrame));
                     vTaskDelay(100);
                     esp_restart();
                 }
+                else if (strcmp(cmd, "RSO") == 0)                                    //Robot data reset
+                {
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Reseting robot odometry...\n");
+                    #endif
+                    dataInit();
+                }
+                else if (strcmp(cmd, "FRS") == 0)                                    //Flash memory reset
+                {
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Reseting flash memory to known values...\n");
+                    #endif
+                        resetFlash();
+                }
+                else if (strcmp(cmd, "ACC") == 0)                                    //Accesory control
+                {
+                    strncpy(temp1, inputData + 7, 1);
+                    strncpy(temp2, inputData + 9, 1);
+                    switch (strtol(temp1, NULL, 10))
+                    {
+                    case 1:
+                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(temp2, NULL, 10)));
+                        #ifdef DEBUG_MSSGS
+                            sprintf(outputFrame, "Switching accesory 1 state to %d ...\n", !((bool)strtol(temp2, NULL, 10)));
+                        #endif
+                        break;
+                    case 2:
+                        gpio_set_level(ACCESORY_PORT_2, !((bool)strtol(temp2, NULL, 10)));
+                        #ifdef DEBUG_MSSGS
+                            sprintf(outputFrame, "Switching accesory 2 state to %d ...\n", !((bool)strtol(temp2, NULL, 10)));
+                        #endif
+                        break;
+                    default:
+                        #ifdef DEBUG_MSSGS
+                            sprintf(outputFrame, "Unexisting accesory...\n");
+                        #endif
+                        break;
+                    }
+                }
+                else if (strcmp(cmd, "CTR") == 0)                                    //Main control frame
+                {
+                    #if ROBOT_CLASS == 1
+                        strncpy(temp1, inputData + 7, 6);
+                        strncpy(temp2, inputData + 14, 6);
+                        strncpy(&temp3, inputData + 21, 1);
+                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
+                        xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
+                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                        mainDataStruct.right_wheel_target_speed = (strtof(temp1, NULL) + strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
+                        mainDataStruct.left_wheel_target_speed = (strtof(temp1, NULL) - strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
+                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                        sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
+                        xSemaphoreGive(SystemHandles.RobotDataAccess);
+                    #elif ROBOT_CLASS == 2
+                        strncpy(temp1, inputData + 7, 6);
+                        strncpy(temp2, inputData + 14, 6);
+                        strncpy(&temp3, inputData + 21, 1);
+                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
+                        xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
+                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                        mainDataStruct.FL_target_speed = strtof(temp1, NULL);
+                        mainDataStruct.FR_target_speed = strtof(temp1, NULL);
+                        mainDataStruct.RL_target_speed = strtof(temp1, NULL);
+                        mainDataStruct.RR_target_speed = strtof(temp1, NULL);   //Dorzucić kiedyś różne prędkości kół przy skrętach (elektroniczny dyferencjał)
+                        mainDataStruct.steering_target_position = strtof(temp2, NULL);
+                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                        sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
+                        xSemaphoreGive(SystemHandles.RobotDataAccess);
+                    #endif
+
+                }
+                #if ROBOT_CLASS == 1
                 else if (strcmp(cmd, "WHD") == 0)                                    //Change wheel dimension
                 {
                     strncpy(temp1, inputData + 7, 6);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     constantsDataStruct.wheel_size = strtof(temp1, NULL);
-                    sprintf(outputFrame, "Changed wheel size to %6.2f\n", constantsDataStruct.wheel_size);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Changed wheel size to %6.2f\n", constantsDataStruct.wheel_size);
+                    #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
                 }
@@ -63,41 +139,39 @@ void comm_task()
                     strncpy(temp1, inputData + 8, 6);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     constantsDataStruct.wheel_separation = strtof(temp1, NULL);
-                    sprintf(outputFrame, "Changed wheel separation distance to %6.2f\n", constantsDataStruct.wheel_separation);
+                    #ifdef DEBUG_MSSGS 
+                        sprintf(outputFrame, "Changed wheel separation distance to %6.2f\n", constantsDataStruct.wheel_separation);
+                    #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
                 }
-                else if (strcmp(cmd, "DSC") == 0)                                    //Change wheel separation distance
+                else if (strcmp(cmd, "DSC") == 0)                                    //Display constants
                 {
-                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                    sprintf(outputFrame, "Current constants\nWheel size: %7.3f\nWheel spacing: %7.3f\nKP: %7.3f\nKI: %7.3f\n", constantsDataStruct.wheel_size, constantsDataStruct.wheel_separation, constantsDataStruct.KP, constantsDataStruct.KI);
-                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    #ifdef DEBUG_MSSGS
+                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                        sprintf(outputFrame, "Current constants\nWheel size: %7.3f\nWheel spacing: %7.3f\nKP: %7.3f\nKI: %7.3f\n", constantsDataStruct.wheel_size, constantsDataStruct.wheel_separation, constantsDataStruct.KP, constantsDataStruct.KI);
+                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    #endif
                 }
-                else if (strcmp(cmd, "FRS") == 0)                                    //Flash memory reset
-                {
-                    sprintf(outputFrame, "Reseting flash memory to known values...\n");
-                    resetFlash();
-                }
-                else if (strcmp(cmd, "RSO") == 0)                                    //Robot data reset
-                {
-                    sprintf(outputFrame, "Reseting robot odometry...\n");
-                    dataInit();
-                }
-                else if (strcmp(cmd, "CKP") == 0)                                    //Robot data reset
+                else if (strcmp(cmd, "CKP") == 0)                                    //Change KP
                 {
                     strncpy(temp1, inputData + 7, 7);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     constantsDataStruct.KP = strtof(temp1, NULL);
-                    sprintf(outputFrame, "Changed KP to %7.3f\n", constantsDataStruct.KP);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Changed KP to %7.3f\n", constantsDataStruct.KP);
+                    #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
                 }
-                else if (strcmp(cmd, "CKI") == 0)                                    //Robot data reset
+                else if (strcmp(cmd, "CKI") == 0)                                    //Change KI
                 {
                     strncpy(temp1, inputData + 7, 7);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     constantsDataStruct.KI = strtof(temp1, NULL);
-                    sprintf(outputFrame, "Changed KI to %7.3f\n", constantsDataStruct.KI);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Changed KI to %7.3f\n", constantsDataStruct.KI);
+                    #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
                 }
@@ -106,7 +180,9 @@ void comm_task()
                     strncpy(temp1, inputData + 7, 7);
                     xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
                     mainDataStruct.left_wheel_target_speed = strtof(temp1, NULL);
-                    sprintf(outputFrame, "Setting left wheel speed to %7.3f\n", mainDataStruct.left_wheel_target_speed * 100.0);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Setting left wheel speed to %7.3f\n", mainDataStruct.left_wheel_target_speed * 100.0);
+                    #endif
                     xSemaphoreGive(SystemHandles.RobotDataAccess);
                 }
                 else if (strcmp(cmd, "SSR") == 0)                                    //Set right wheel speed
@@ -114,43 +190,22 @@ void comm_task()
                     strncpy(temp1, inputData + 7, 7);
                     xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
                     mainDataStruct.right_wheel_target_speed = strtof(temp1, NULL);
-                    sprintf(outputFrame, "Setting right wheel speed to %7.3f\n", mainDataStruct.right_wheel_target_speed * 100.0);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Setting right wheel speed to %7.3f\n", mainDataStruct.right_wheel_target_speed * 100.0);
+                    #endif
                     xSemaphoreGive(SystemHandles.RobotDataAccess);
                 }
-                else if (strcmp(cmd, "CTR") == 0)                                    //Main control frame
-                {
-                    strncpy(temp1, inputData + 7, 6);
-                    strncpy(temp2, inputData + 14, 6);
-                    strncpy(&temp3, inputData + 21, 1);
-                    gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
-                    xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                    mainDataStruct.right_wheel_target_speed = (strtof(temp1, NULL) + strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
-                    mainDataStruct.left_wheel_target_speed = (strtof(temp1, NULL) - strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
-                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
-                    sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
-                    xSemaphoreGive(SystemHandles.RobotDataAccess);
-                }
-                else if (strcmp(cmd, "ACC") == 0)
-                {
-                    strncpy(temp1, inputData + 7, 1);
-                    strncpy(temp2, inputData + 9, 1);
-                    if(strtol(temp1, NULL, 10) == 1)
-                    {
-                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(temp2, NULL, 10)));
-                    }
-                    /*else if(strtol(temp1, NULL, 10) == 2)
-                    {
-                        gpio_set_level(ACCESORY_PORT_2, strtol(temp2, NULL, 10));
-                    }*/
-                   sprintf(outputFrame, "Switching accesory %d state to %d ...\n", strtol(temp1, NULL, 10) == 1, strtol(temp2, NULL, 10) == 1);
-                }
+                #elif ROBOT_CLASS == 2
+
+                #else
+                    #error Unrecognized robot class.
+                #endif
             }
         }
         else
         {
             xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-            sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
+            sprintf(outputFrame, "%s;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", ROBOT_ID, mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
             xSemaphoreGive(SystemHandles.RobotDataAccess);
         }
         uart_write_bytes(UART_PORT_NUM, outputFrame, strlen(outputFrame));
@@ -159,7 +214,7 @@ void comm_task()
         while(uxQueueMessagesWaiting(SystemHandles.errorQueue) > 0)
         {
             xQueueReceive(SystemHandles.errorQueue, &temp, portMAX_DELAY);
-            sprintf(outputFrame, "ER;%s\n", esp_err_to_name(temp));
+            sprintf(outputFrame, "%s;ERR;%s\n", ROBOT_ID, esp_err_to_name(temp));
             uart_write_bytes(UART_PORT_NUM, outputFrame, strlen(outputFrame));
         }
         xSemaphoreGive(SystemHandles.OpSysAccess);

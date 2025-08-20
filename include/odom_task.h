@@ -8,6 +8,9 @@
 #include "pinout.h"
 #include "rotary_encoder.h"
 
+/*
+* @brief Task responsible for calculation of robots odometry.
+*/
 void odom_task();
 
 #endif

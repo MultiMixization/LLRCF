@@ -13,7 +13,7 @@
 
 RobotData mainDataStruct;
 RobotConstants constantsDataStruct;
-OpSyS SystemHandles;
+OpSys SystemHandles;
 
 void app_main()
 {
