@@ -1,3 +1,8 @@
+/**
+ * @file comm_task.c
+ * @brief File containing implementation of the communication task.
+ */
+
 #include "comm_task.h"
 
 extern RobotData mainDataStruct;
@@ -72,15 +77,19 @@ void comm_task()
                     switch (strtol(temp1, NULL, 10))
                     {
                     case 1:
-                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(temp2, NULL, 10)));
-                        #ifdef DEBUG_MSSGS
-                            sprintf(outputFrame, "Switching accesory 1 state to %d ...\n", !((bool)strtol(temp2, NULL, 10)));
+                        #if ACCESORY_1_TYPE != 0
+                        
+                            #ifdef DEBUG_MSSGS
+                                sprintf(outputFrame, "Switching accesory 1 state to %d ...\n", !((bool)strtol(temp2, NULL, 10)));
+                            #endif
                         #endif
                         break;
                     case 2:
-                        gpio_set_level(ACCESORY_PORT_2, !((bool)strtol(temp2, NULL, 10)));
-                        #ifdef DEBUG_MSSGS
-                            sprintf(outputFrame, "Switching accesory 2 state to %d ...\n", !((bool)strtol(temp2, NULL, 10)));
+                        #if ACCESORY_2_TYPE != 0
+                            
+                            #ifdef DEBUG_MSSGS
+                                sprintf(outputFrame, "Switching accesory 2 state to %d ...\n", !((bool)strtol(temp2, NULL, 10)));
+                            #endif
                         #endif
                         break;
                     default:
@@ -90,39 +99,21 @@ void comm_task()
                         break;
                     }
                 }
+                #if ROBOT_CLASS == 1    
                 else if (strcmp(cmd, "CTR") == 0)                                    //Main control frame
                 {
-                    #if ROBOT_CLASS == 1
-                        strncpy(temp1, inputData + 7, 6);
-                        strncpy(temp2, inputData + 14, 6);
-                        strncpy(&temp3, inputData + 21, 1);
-                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
-                        xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                        mainDataStruct.right_wheel_target_speed = (strtof(temp1, NULL) + strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
-                        mainDataStruct.left_wheel_target_speed = (strtof(temp1, NULL) - strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
-                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
-                        sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
-                        xSemaphoreGive(SystemHandles.RobotDataAccess);
-                    #elif ROBOT_CLASS == 2
-                        strncpy(temp1, inputData + 7, 6);
-                        strncpy(temp2, inputData + 14, 6);
-                        strncpy(&temp3, inputData + 21, 1);
-                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
-                        xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                        mainDataStruct.FL_target_speed = strtof(temp1, NULL);
-                        mainDataStruct.FR_target_speed = strtof(temp1, NULL);
-                        mainDataStruct.RL_target_speed = strtof(temp1, NULL);
-                        mainDataStruct.RR_target_speed = strtof(temp1, NULL);   //Dorzucić kiedyś różne prędkości kół przy skrętach (elektroniczny dyferencjał)
-                        mainDataStruct.steering_target_position = strtof(temp2, NULL);
-                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
-                        sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
-                        xSemaphoreGive(SystemHandles.RobotDataAccess);
-                    #endif
-
+                    strncpy(temp1, inputData + 7, 6);
+                    strncpy(temp2, inputData + 14, 6);
+                    strncpy(&temp3, inputData + 21, 1);
+                    gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
+                    xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
+                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                    mainDataStruct.right_wheel_target_speed = (strtof(temp1, NULL) + strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
+                    mainDataStruct.left_wheel_target_speed = (strtof(temp1, NULL) - strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
+                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
+                    xSemaphoreGive(SystemHandles.RobotDataAccess);
                 }
-                #if ROBOT_CLASS == 1
                 else if (strcmp(cmd, "WHD") == 0)                                    //Change wheel dimension
                 {
                     strncpy(temp1, inputData + 7, 6);
@@ -196,7 +187,40 @@ void comm_task()
                     xSemaphoreGive(SystemHandles.RobotDataAccess);
                 }
                 #elif ROBOT_CLASS == 2
+                else if (strcmp(cmd, "CKP") == 0)
+                {
+                    strncpy(temp1, inputData + 7, 2);
+                    strncpy(temp2, inputData + 7, 7);
+                    if (strtol(temp1, NULL, 10) == 1)
+                    {
 
+                    }
+                    else if (strtol(temp1, NULL, 10) == 2)
+                    {
+
+                    }
+                    
+                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                    
+                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                }
+                else if (strcmp(cmd, "CTR") == 0)                                    //Main control frame
+                {
+                    strncpy(temp1, inputData + 7, 6);
+                    strncpy(temp2, inputData + 14, 6);
+                    strncpy(&temp3, inputData + 21, 1);
+                    gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
+                    xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
+                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                    mainDataStruct.FL_target_speed = strtof(temp1, NULL);
+                    mainDataStruct.FR_target_speed = strtof(temp1, NULL);
+                    mainDataStruct.RL_target_speed = strtof(temp1, NULL);
+                    mainDataStruct.RR_target_speed = strtof(temp1, NULL);   //Dorzucić kiedyś różne prędkości kół przy skrętach (elektroniczny dyferencjał)
+                    mainDataStruct.steering_target_position = strtof(temp2, NULL);
+                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
+                    xSemaphoreGive(SystemHandles.RobotDataAccess);
+                }
                 #else
                     #error Unrecognized robot class.
                 #endif
@@ -219,6 +243,6 @@ void comm_task()
         }
         xSemaphoreGive(SystemHandles.OpSysAccess);
         
-        xTaskDelayUntil(&SystemHandles.comm_last_wakeup, 100);
+        xTaskDelayUntil(&SystemHandles.comm_last_wakeup, pdMS_TO_TICKS(1000 / COMM_TASK_FREQ));
     }
 }

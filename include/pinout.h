@@ -1,3 +1,8 @@
+/**
+ * @file pinout.h
+ * @brief Header file containing pin definitions for the microcontroller as well as funtions for initiating them and data structures.
+ */
+
 #ifndef PINOUT_H
 #define PINOUT_H
 
@@ -16,8 +21,17 @@
 #define UART_TX_PIN GPIO_NUM_1
 #define UART_RX_PIN GPIO_NUM_3
 
-#define ACCESORY_PORT_1 GPIO_NUM_22
-#define ACCESORY_PORT_2 GPIO_NUM_23
+#if ACCESORY_1_TYPE != 0
+    #define ACCESORY_PORT_1 GPIO_NUM_22
+#endif
+
+#if ACCESORY_2_TYPE != 0
+    #define ACCESORY_PORT_2 GPIO_NUM_23
+#endif
+
+#ifdef SAFETY_SWITCH
+    #define SAFETY_SWITCH_PIN GPIO_NUM_0
+#endif
 
 #if ROBOT_CLASS == 1
 //--------------------------------- Encoders ---------------------------------
@@ -59,11 +73,11 @@
     #define RL_MOTOR_DIR GPIO_NUM_5
     #define RL_MOTOR_PWM GPIO_NUM_17
     
-    #define RR_MOTOR_DIR GPIO_NUM_0
-    #define RR_MOTOR_PWM GPIO_NUM_2
+    #define RR_MOTOR_DIR GPIO_NUM_15
+    #define RR_MOTOR_PWM GPIO_NUM_8
 
-    #define STEERING_MOTOR_DIR GPIO_NUM_14
-    #define STEERING_MOTOR_PWM GPIO_NUM_12
+    #define STEERING_MOTOR_DIR GPIO_NUM_7
+    #define STEERING_MOTOR_PWM GPIO_NUM_6
 #else 
     #error Unrecognized robot class.
 #endif

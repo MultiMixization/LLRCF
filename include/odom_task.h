@@ -1,3 +1,8 @@
+/**
+ * @file odom_task.h
+ * @brief File containing the definition of the odometry calculation task.
+ */
+
 #ifndef ODOM_TASK_H
 #define ODOM_TASK_H
 
@@ -10,6 +15,10 @@
 
 /*
 * @brief Task responsible for calculation of robots odometry.
+*
+* The task grabs the robot constants values from the constantsDataStruct structure at startup.
+* They are then saved localy and used to calculate the size of each wheel.
+* After the setup the task operates at 
 */
 void odom_task();
 

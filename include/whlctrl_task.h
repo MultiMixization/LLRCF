@@ -1,3 +1,8 @@
+/**
+ * @file whlctrl_task.h
+ * @brief Header file containing definition of the wheel control task.
+ */
+
 #ifndef WHLCTRL_TASK_H
 #define WHLCTRL_TASK_H
 

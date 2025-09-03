@@ -1,5 +1,17 @@
+/**
+ * @file config.h
+ * @brief File containing configuration variables for the project.
+ */
+
 #ifndef CONFIG_H
 #define CONFIG_H
+
+    // ----- RTOS SETTINGS ----- //
+
+    #define COMM_TASK_FREQ 10.0         /** Frequency at which the main loop of the communication task runs. */
+    #define ODOM_TASK_FREQ 100.0        /** Frequency at which the main loop of the odometry calculation task runs. */
+    #define WHEEL_CTRL_TASK_FREQ 10.0   /** Frequency at which the main loop of the wheel controling task runs. */
+    #define ACCESORY_TASK_FREQ 5.0      /** Frequency at which the main loop of the accesory controling task runs. */
 
     // ----- ENCODER SETTINGS ----- //
 
@@ -30,8 +42,8 @@
     *   You need to declare what kind of motor drivers the robot uses.
     *
     *   Possible options:
-    *   1   -   Cytron MDD20A dual channel motor driver 
-    *   2   -   BTS7960 IBT2 dual channel motor driver
+    *   1   -   PWM and DIR pins line a Cytron MDD20A dual channel motor driver 
+    *   2   -   two PWM pins like a BTS7960 IBT2 dual channel motor driver
     */
     #define CONTROL_SCHEME 1
 
@@ -40,8 +52,30 @@
     #define ROBOT_ID "RD"           //Two letter ID of the robot
     #define ERROR_QUEUE_SIZE 1024   //Maximu size of the error queue.
 
-    #define ACCESORY_1_BASE_STATE 1 //State of the pin controlling the accesory 1
-    #define ACCESORY_2_BASE_STATE 1 //State of the pin controlling the accesory 2
+    /**
+     * Declare what type of accessories are connected.
+     * 
+     * Possible options:
+     * 0    -   None        - no accesory is connected.
+     * 1    -   Binary      - the accesory is handled by a digital pin.
+     * 2    -   Analogue    - the accesory is handled by a DAC capable pin and uses analogue signal.
+     */
+    #define ACCESORY_1_TYPE 1
+
+    /**
+     * Declare what type of accessories are connected.
+     * 
+     * Possible options:
+     * 0    -   None        - no accesory is connected.
+     * 1    -   Binary      - the accesory is handled by a digital pin.
+     * 2    -   Analogue    - the accesory is handled by a DAC capable pin and uses analogue signal.
+     */
+    #define ACCESORY_2_TYPE 0
+
+    #define ACCESORY_1_BASE_STATE 1 //Starting state of the pin controlling the accesory 1
+    #define ACCESORY_2_BASE_STATE 1 //Starting state of the pin controlling the accesory 2
+
+    #define SAFETY_SWITCH
 
     #define DEBUG_MSSGS             //Send human readable messages that do not conform to the formal standard. Comment this option for deployment.
 

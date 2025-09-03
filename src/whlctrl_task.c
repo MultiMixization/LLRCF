@@ -1,3 +1,9 @@
+/**
+ * @file whlctrl_task.cpp
+ * @brief File holding the implementation of the wheel control task.
+ * @
+ */
+
 #include "whlctrl_task.h"
 
 extern RobotData mainDataStruct;
@@ -251,7 +257,7 @@ extern OpSys SystemHandles;
             checkError(ledc_channel_config(&steering_actuator));
 
         #elif CONTROL_SCHEME == 2
-            #error Not enough LEDC channels on this uC.
+            #error Not enough PWM channels on this uC.
         #else
             #error Unrecognized control scheme.
         #endif
@@ -266,13 +272,13 @@ extern OpSys SystemHandles;
             FR_error_integral += (mainDataStruct.FR_target_speed - mainDataStruct.FR_speed);
             RL_error_integral += (mainDataStruct.RL_target_speed - mainDataStruct.RL_speed);
             RR_error_integral += (mainDataStruct.RR_target_speed - mainDataStruct.RR_speed);
+            steering_error_integral += (mainDataStruct.steering_position - mainDataStruct.steering_target_position);
 
             FL_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.FL_target_speed - mainDataStruct.FL_speed) + constantsDataStruct.velocity_KI * FL_error_integral + constantsDataStruct.velocity_KD * (0);
             FR_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.FR_target_speed - mainDataStruct.FR_speed) + constantsDataStruct.velocity_KI * FR_error_integral + constantsDataStruct.velocity_KD * (0);
             RL_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.RL_target_speed - mainDataStruct.RL_speed) + constantsDataStruct.velocity_KI * RL_error_integral + constantsDataStruct.velocity_KD * (0);
             RR_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.RR_target_speed - mainDataStruct.RR_speed) + constantsDataStruct.velocity_KI * RR_error_integral + constantsDataStruct.velocity_KD * (0);
-            
-            //Add steering control value calculation
+            steering_control_value = constantsDataStruct.angle_KP * (mainDataStruct.steering_position - mainDataStruct.steering_target_position) + constantsDataStruct.angle_KI * steering_error_integral;
 
             xSemaphoreGive(SystemHandles.RobotDataAccess);
             xSemaphoreGive(SystemHandles.ConstantDataAccess); 
@@ -307,6 +313,23 @@ extern OpSys SystemHandles;
             if(steering_error_integral >= PID_ERROR_LIMIT) steering_error_integral = PID_ERROR_LIMIT;
             if(steering_error_integral <= -PID_ERROR_LIMIT) steering_error_integral = -PID_ERROR_LIMIT;
 
+            #ifdef SAFETY_SWITCH
+                xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
+                mainDataStruct.safety_switch_state = gpio_get_level(SAFETY_SWITCH_PIN);
+                if(mainDataStruct.safety_switch_state)
+                {
+                    FL_control_value = 0.0;
+                    FL_error_integral = 0.0;
+                    FR_control_value = 0.0;
+                    FR_error_integral = 0.0;
+                    RL_control_value = 0.0;
+                    RL_error_integral = 0.0;
+                    RR_control_value = 0.0;
+                    RR_error_integral = 0.0;
+                }
+                xSemaphoreGive(SystemHandles.RobotDataAccess);
+            #endif  
+
             #if CONTROL_SCHEME == 1
                 FL_control_value >= 0 ? gpio_set_level(FL_MOTOR_DIR, 0) : gpio_set_level(FL_MOTOR_DIR, 1);
                 FR_control_value >= 0 ? gpio_set_level(FR_MOTOR_DIR, 0) : gpio_set_level(FR_MOTOR_DIR, 1);
@@ -325,12 +348,12 @@ extern OpSys SystemHandles;
                 checkError(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_3));
                 checkError(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_4));
             #elif CONTROL_SCHEME == 2
-
+                #error Not enough PWM channels on this uC.
             #else 
                 #error Unrecognized control scheme.
             #endif
 
-            xTaskDelayUntil(&SystemHandles.whlctrl_last_wakeup, 10);
+            xTaskDelayUntil(&SystemHandles.whlctrl_last_wakeup, pdMS_TO_TICKS(1000 / WHEEL_CTRL_TASK_FREQ));
         }
     }
 #else

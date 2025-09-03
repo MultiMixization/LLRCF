@@ -1,3 +1,8 @@
+/**
+ * @file pinout.c
+ * @brief File containing implementation of the functions from the pinout.h file.
+ */
+
 #include "pinout.h"
 
 extern RobotData mainDataStruct;
@@ -6,12 +11,6 @@ extern OpSys SystemHandles;
 
 void pinInit()
 {
-    gpio_set_direction(ACCESORY_PORT_1, GPIO_MODE_OUTPUT_OD);
-    gpio_set_level(ACCESORY_PORT_1, ACCESORY_1_BASE_STATE);
-
-    gpio_set_direction(ACCESORY_PORT_2, GPIO_MODE_OUTPUT_OD);
-    gpio_set_level(ACCESORY_PORT_2, ACCESORY_2_BASE_STATE);
-
     #if ROBOT_CLASS == 1
         esp_rom_gpio_pad_select_gpio(LEFT_ENCODER_A);
         gpio_set_direction(LEFT_ENCODER_A, GPIO_MODE_INPUT);
@@ -85,6 +84,22 @@ void pinInit()
          #error Unrecognized robot class
     #endif
 
+    #if ACCESORY_1_TYPE != 0
+        esp_rom_gpio_pad_select_gpio(ACCESORY_PORT_1);
+        gpio_set_direction(ACCESORY_PORT_1, GPIO_MODE_OUTPUT_OD);
+        gpio_set_level(ACCESORY_PORT_1, ACCESORY_1_BASE_STATE);
+    #endif
+    #if ACCESORY_2_TYPE != 0
+        esp_rom_gpio_pad_select_gpio(ACCESORY_PORT_2);
+        gpio_set_direction(ACCESORY_PORT_2, GPIO_MODE_OUTPUT_OD);
+        gpio_set_level(ACCESORY_PORT_2, ACCESORY_2_BASE_STATE);
+    #endif
+
+    #ifdef SAFETY_SWITCH
+        esp_rom_gpio_pad_select_gpio(SAFETY_SWITCH_PIN);
+        gpio_set_direction(SAFETY_SWITCH_PIN, GPIO_MODE_INPUT);
+    #endif
+
     gpio_install_isr_service(0);
 }
 
@@ -136,6 +151,11 @@ void dataInit()
     mainDataStruct.pos_z = 0.0;
 
     Quaternion_setIdentity(&mainDataStruct.orientation);
+
+    #ifdef SAFETY_SWITCH
+        mainDataStruct.safety_switch_state = false;
+    #endif
+
     xSemaphoreGive(SystemHandles.RobotDataAccess);
     SystemHandles.errorQueue = xQueueCreate(ERROR_QUEUE_SIZE, sizeof(esp_err_t));
 }
@@ -177,14 +197,13 @@ void resetFlash()
         constantsDataStruct.front_wheel_separation = 1.0;
         constantsDataStruct.rear_wheel_separation = 1.0;
         constantsDataStruct.front_wheel_longitudinal_distance = 1.0;
-        constantsDataStruct.rear_wheel_longitudinal_distance = 1.0;
 
-        constantsDataStruct.velocity_KP = 1.0;
-        constantsDataStruct.velocity_KI = 1.0;
+        constantsDataStruct.velocity_KP = 100.0;
+        constantsDataStruct.velocity_KI = 10.0;
         constantsDataStruct.velocity_KD = 1.0;
 
-        constantsDataStruct.angle_KP = 1.0;
-        constantsDataStruct.angle_KI = 1.0;
+        constantsDataStruct.angle_KP = 100.0;
+        constantsDataStruct.angle_KI = 10.0;
         constantsDataStruct.angle_KD = 1.0;
     #else
          #error Unrecognized robot class

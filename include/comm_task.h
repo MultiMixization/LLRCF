@@ -1,3 +1,8 @@
+/**
+ * @file comm_task.h
+ * @brief File containing the definition of the communication task.
+ */
+
 #ifndef COMM_TASK_H
 #define COMM_TASK_H
 
