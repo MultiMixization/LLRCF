@@ -109,10 +109,18 @@ extern OpSys SystemHandles;
         checkError(rotary_encoder_enable_half_steps(&RL, ENABLE_HALF_STEPS));
         checkError(rotary_encoder_enable_half_steps(&RR, ENABLE_HALF_STEPS));
 
-        checkError(rotary_encoder_flip_direction(&FL));
-        checkError(rotary_encoder_flip_direction(&FR));
-        checkError(rotary_encoder_flip_direction(&RL));
-        checkError(rotary_encoder_flip_direction(&RR));
+        #if FL_FLIP_DIRECTION == true
+            checkError(rotary_encoder_flip_direction(&FL));
+        #endif
+        #if FR_FLIP_DIRECTION == true
+            checkError(rotary_encoder_flip_direction(&FR));
+        #endif
+        #if RL_FLIP_DIRECTION == true
+            checkError(rotary_encoder_flip_direction(&RL));
+        #endif
+        #if RR_FLIP_DIRECTION == true
+            checkError(rotary_encoder_flip_direction(&RR));
+        #endif
 
         checkError(rotary_encoder_set_queue(&FL, FL_event_queue));
         checkError(rotary_encoder_set_queue(&FR, FR_event_queue));
@@ -123,7 +131,16 @@ extern OpSys SystemHandles;
         front_wheel_size = 2.0 * M_PI * constantsDataStruct.front_wheel_size;
         rear_wheel_size = 2.0 * M_PI * constantsDataStruct.rear_wheel_size;
         front_wheel_longitudinal_distance = constantsDataStruct.front_wheel_longitudinal_distance;
+
+        AS5040_info angle_sensor = {
+            .pin_clk = ANGLE_SENSOR_CLK,
+            .pin_cs = ANGLE_SENSOR_CS,
+            .pin_data = ANGLE_SENSOR_DATA,
+            .offset = constantsDataStruct.angle_offset
+        };
         xSemaphoreGive(SystemHandles.ConstantDataAccess);
+
+        AS5040_init(&angle_sensor);
 
         SystemHandles.odom_last_wakeup = xTaskGetTickCount();
 
@@ -149,6 +166,8 @@ extern OpSys SystemHandles;
             mainDataStruct.FR_acceleration = (mainDataStruct.FR_speed - FR_prev_speed) * ODOM_TASK_FREQ;
             mainDataStruct.RL_acceleration = (mainDataStruct.RL_speed - RL_prev_speed) * ODOM_TASK_FREQ;
             mainDataStruct.RR_acceleration = (mainDataStruct.RR_speed - RR_prev_speed) * ODOM_TASK_FREQ;
+
+            AS5040_read(&angle_sensor, &mainDataStruct.steering_position);
 
             FL_prev_position = mainDataStruct.FL_position;
             FR_prev_position = mainDataStruct.FR_position;

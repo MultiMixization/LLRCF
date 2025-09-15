@@ -22,15 +22,15 @@
 #define UART_RX_PIN GPIO_NUM_3
 
 #if ACCESORY_1_TYPE != 0
-    #define ACCESORY_PORT_1 GPIO_NUM_22
+    #define ACCESORY_PORT_1 
 #endif
 
 #if ACCESORY_2_TYPE != 0
-    #define ACCESORY_PORT_2 GPIO_NUM_23
+    #define ACCESORY_PORT_2 GPIO_NUM_13
 #endif
 
 #ifdef SAFETY_SWITCH
-    #define SAFETY_SWITCH_PIN GPIO_NUM_0
+    #define SAFETY_SWITCH_PIN GPIO_NUM_2
 #endif
 
 #if ROBOT_CLASS == 1
@@ -50,34 +50,37 @@
 
 #elif ROBOT_CLASS == 2
 
-    #define FL_ENCODER_A GPIO_NUM_34
-    #define FL_ENCODER_B GPIO_NUM_35
+    #define FL_ENCODER_A GPIO_NUM_36
+    #define FL_ENCODER_B GPIO_NUM_39
 
-    #define FR_ENCODER_A GPIO_NUM_25
-    #define FR_ENCODER_B GPIO_NUM_26
+    #define FR_ENCODER_A GPIO_NUM_34
+    #define FR_ENCODER_B GPIO_NUM_35
 
-    #define RL_ENCODER_A GPIO_NUM_19
-    #define RL_ENCODER_B GPIO_NUM_18
+    #define RL_ENCODER_A GPIO_NUM_32
+    #define RL_ENCODER_B GPIO_NUM_33
 
-    #define RR_ENCODER_A GPIO_NUM_16
-    #define RR_ENCODER_B GPIO_NUM_4
+    #define RR_ENCODER_A GPIO_NUM_25
+    #define RR_ENCODER_B GPIO_NUM_26
 
+    #define ANGLE_SENSOR_CS GPIO_NUM_15
+    #define ANGLE_SENSOR_CLK GPIO_NUM_14
+    #define ANGLE_SENSOR_DATA GPIO_NUM_12
 
 //--------------------------------- Motors ---------------------------------
-    #define FL_MOTOR_DIR GPIO_NUM_32
-    #define FL_MOTOR_PWM GPIO_NUM_33
+    #define FL_MOTOR_DIR GPIO_NUM_23
+    #define FL_MOTOR_PWM GPIO_NUM_22
 
-    #define FR_MOTOR_DIR GPIO_NUM_27
-    #define FR_MOTOR_PWM GPIO_NUM_14
+    #define FR_MOTOR_DIR GPIO_NUM_21
+    #define FR_MOTOR_PWM GPIO_NUM_19
 
-    #define RL_MOTOR_DIR GPIO_NUM_5
-    #define RL_MOTOR_PWM GPIO_NUM_17
+    #define RR_MOTOR_DIR GPIO_NUM_18
+    #define RR_MOTOR_PWM GPIO_NUM_5
     
-    #define RR_MOTOR_DIR GPIO_NUM_15
-    #define RR_MOTOR_PWM GPIO_NUM_8
+    #define RL_MOTOR_DIR GPIO_NUM_17
+    #define RL_MOTOR_PWM GPIO_NUM_16
 
-    #define STEERING_MOTOR_DIR GPIO_NUM_7
-    #define STEERING_MOTOR_PWM GPIO_NUM_6
+    #define STEERING_MOTOR_DIR GPIO_NUM_4
+    #define STEERING_MOTOR_PWM GPIO_NUM_0
 #else 
     #error Unrecognized robot class.
 #endif

@@ -27,11 +27,11 @@ void app_main()
     SystemHandles.OpSysAccess = xSemaphoreCreateMutex();
     SystemHandles.LowImpDataAccess = xSemaphoreCreateMutex();
 
-    dataInit(&mainDataStruct);
-    readConstantsFromFlash(&constantsDataStruct);
+    dataInit();
+    readConstantsFromFlash();
     
-    xTaskCreatePinnedToCore(comm_task, "comm_task", 4096, NULL, 1, &SystemHandles.comm_task_handler, 1);
-    xTaskCreatePinnedToCore(odom_task, "odom_task", 4096, NULL, 2, &SystemHandles.odom_task_handler, 1);
-    xTaskCreatePinnedToCore(whlctrl_task, "whlctrl_task", 4096, NULL, 2, &SystemHandles.whlctrl_task_handler, 0);
-    xTaskCreatePinnedToCore(accesory_task, "accesory_task", 2048, NULL, 1, &SystemHandles.accesory_task_handler, 2);
+    xTaskCreatePinnedToCore(comm_task, "comm_task", 4096, NULL, 2, &SystemHandles.comm_task_handler, 1);
+    xTaskCreatePinnedToCore(odom_task, "odom_task", 4096, NULL, 1, &SystemHandles.odom_task_handler, 1);
+    xTaskCreatePinnedToCore(whlctrl_task, "whlctrl_task", 4096, NULL, 1, &SystemHandles.whlctrl_task_handler, 0);
+    xTaskCreatePinnedToCore(accesory_task, "accesory_task", 4096, NULL, 3, &SystemHandles.accesory_task_handler, 0);
 }

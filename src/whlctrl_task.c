@@ -129,20 +129,20 @@ extern OpSys SystemHandles;
             #if CONTROL_SCHEME == 1
                 if(left_ctrl_value > 0)
                 {
-                    gpio_set_level(LEFT_MOTOR_DIR, 0);
+                    gpio_set_level(LEFT_MOTOR_DIR, !FLIP_LEFT_MOTOR_DIRECTION);
                 }
                 else
                 {
-                    gpio_set_level(LEFT_MOTOR_DIR, 1);
+                    gpio_set_level(LEFT_MOTOR_DIR, FLIP_LEFT_MOTOR_DIRECTION);
                 }
 
                 if (right_ctrl_value > 0)
                 {
-                    gpio_set_level(RIGHT_MOTOR_DIR, 1);
+                    gpio_set_level(RIGHT_MOTOR_DIR, !FLIP_RIGHT_MOTOR_DIRECTION);
                 }
                 else
                 {
-                    gpio_set_level(RIGHT_MOTOR_DIR, 0);
+                    gpio_set_level(RIGHT_MOTOR_DIR, FLIP_RIGHT_MOTOR_DIRECTION);
                 }
                 checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, abs(left_ctrl_value)));
                 checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, abs(right_ctrl_value)));
@@ -245,7 +245,7 @@ extern OpSys SystemHandles;
             };
             checkError(ledc_channel_config(&RR_motor));
 
-                ledc_channel_config_t steering_actuator = {
+            ledc_channel_config_t steering_actuator = {
                 .speed_mode     = LEDC_LOW_SPEED_MODE,
                 .channel        = LEDC_CHANNEL_4,
                 .timer_sel      = LEDC_TIMER_0,
@@ -331,10 +331,10 @@ extern OpSys SystemHandles;
             #endif  
 
             #if CONTROL_SCHEME == 1
-                FL_control_value >= 0 ? gpio_set_level(FL_MOTOR_DIR, 0) : gpio_set_level(FL_MOTOR_DIR, 1);
-                FR_control_value >= 0 ? gpio_set_level(FR_MOTOR_DIR, 0) : gpio_set_level(FR_MOTOR_DIR, 1);
-                RL_control_value >= 0 ? gpio_set_level(RL_MOTOR_DIR, 0) : gpio_set_level(RL_MOTOR_DIR, 1);
-                RR_control_value >= 0 ? gpio_set_level(RR_MOTOR_DIR, 0) : gpio_set_level(RR_MOTOR_DIR, 1);
+                FL_control_value >= 0 ? gpio_set_level(FL_MOTOR_DIR, !FLIP_FL_MOTOR_DIRECTION) : gpio_set_level(FL_MOTOR_DIR, FLIP_FL_MOTOR_DIRECTION);
+                FR_control_value >= 0 ? gpio_set_level(FR_MOTOR_DIR, !FLIP_FR_MOTOR_DIRECTION) : gpio_set_level(FR_MOTOR_DIR, FLIP_FR_MOTOR_DIRECTION);
+                RL_control_value >= 0 ? gpio_set_level(RL_MOTOR_DIR, !FLIP_RL_MOTOR_DIRECTION) : gpio_set_level(RL_MOTOR_DIR, FLIP_RL_MOTOR_DIRECTION);
+                RR_control_value >= 0 ? gpio_set_level(RR_MOTOR_DIR, !FLIP_RR_MOTOR_DIRECTION) : gpio_set_level(RR_MOTOR_DIR, FLIP_RR_MOTOR_DIRECTION);
                 steering_control_value >= 0 ? gpio_set_level(STEERING_MOTOR_DIR, 0) : gpio_set_level(STEERING_MOTOR_DIR, 1);
 
                 checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, abs(FL_control_value)));
@@ -352,7 +352,6 @@ extern OpSys SystemHandles;
             #else 
                 #error Unrecognized control scheme.
             #endif
-
             xTaskDelayUntil(&SystemHandles.whlctrl_last_wakeup, pdMS_TO_TICKS(1000 / WHEEL_CTRL_TASK_FREQ));
         }
     }

@@ -60,32 +60,20 @@ void pinInit()
         esp_rom_gpio_pad_select_gpio(FL_MOTOR_DIR);
         gpio_set_direction(FL_MOTOR_DIR, GPIO_MODE_OUTPUT);
 
-        esp_rom_gpio_pad_select_gpio(FL_MOTOR_PWM);
-        gpio_set_direction(FL_MOTOR_PWM, GPIO_MODE_INPUT);
-
         esp_rom_gpio_pad_select_gpio(FR_MOTOR_DIR);
         gpio_set_direction(FR_MOTOR_DIR, GPIO_MODE_OUTPUT);
-
-        esp_rom_gpio_pad_select_gpio(FR_MOTOR_PWM);
-        gpio_set_direction(FR_MOTOR_PWM, GPIO_MODE_INPUT);
 
         esp_rom_gpio_pad_select_gpio(RL_MOTOR_DIR);
         gpio_set_direction(RL_MOTOR_DIR, GPIO_MODE_OUTPUT);
 
-        esp_rom_gpio_pad_select_gpio(RL_MOTOR_PWM);
-        gpio_set_direction(RL_MOTOR_PWM, GPIO_MODE_INPUT);
-
         esp_rom_gpio_pad_select_gpio(RR_MOTOR_DIR);
         gpio_set_direction(RR_MOTOR_DIR, GPIO_MODE_OUTPUT);
-
-        esp_rom_gpio_pad_select_gpio(RR_MOTOR_PWM);
-        gpio_set_direction(RR_MOTOR_PWM, GPIO_MODE_INPUT);
     #else
          #error Unrecognized robot class
     #endif
 
     #if ACCESORY_1_TYPE != 0
-        esp_rom_gpio_pad_select_gpio(ACCESORY_PORT_1);
+        //esp_rom_gpio_pad_select_gpio(ACCESORY_PORT_1);
         gpio_set_direction(ACCESORY_PORT_1, GPIO_MODE_OUTPUT_OD);
         gpio_set_level(ACCESORY_PORT_1, ACCESORY_1_BASE_STATE);
     #endif
@@ -97,6 +85,7 @@ void pinInit()
 
     #ifdef SAFETY_SWITCH
         esp_rom_gpio_pad_select_gpio(SAFETY_SWITCH_PIN);
+        gpio_set_pull_mode(SAFETY_SWITCH_PIN, GPIO_PULLDOWN_ONLY);
         gpio_set_direction(SAFETY_SWITCH_PIN, GPIO_MODE_INPUT);
     #endif
 

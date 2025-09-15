@@ -12,6 +12,7 @@
 
 #include "pinout.h"
 #include "rotary_encoder.h"
+#include "AS5040.h"
 
 /*
 * @brief Task responsible for calculation of robots odometry.

@@ -116,6 +116,9 @@ typedef struct
         float angle_KI;                         /** Value of the integral term multiplier for the angle controling PID controller. */
         float angle_KD;                         /** Value of the differential term multiplier for the angle controling PID controller. */
 
+        float angle_offset;                     /** Offset allowing for adjusting the neutral position for steering. */
+        float angle_max;                        /** Maximum steering angle. */
+        float angle_min;                        /** Minimum steering angle. */
     #else
         #error Unrecognized robot class
     #endif
