@@ -79,7 +79,7 @@ extern OpSys SystemHandles;
     void odom_task()
     {
         float front_wheel_size, rear_wheel_size, front_wheel_longitudinal_distance;
-        float FL_prev_position = 0.0, FR_prev_position = 0.0, RL_prev_position = 0.0, RR_prev_position = 0.0;
+        float FL_prev_position = 0.0, FR_prev_position = 0.0, RL_prev_position = 0.0, RR_prev_position = 0.0, steering_prev_position = 0.0;
         float FL_prev_speed = 0.0, FR_prev_speed = 0.0, RL_prev_speed = 0.0, RR_prev_speed = 0.0;
         float rot_diff = 0.0, avg_speed = 0.0, curr_eul[3];
         Quaternion rot_diff_quat;
@@ -152,10 +152,10 @@ extern OpSys SystemHandles;
             checkError(rotary_encoder_get_state(&RR, &state_RR));
 
             xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-            mainDataStruct.FL_position = (float)state_FL.position / (ENCODER_STEPS * RATIO) * front_wheel_size;
-            mainDataStruct.FR_position = (float)state_FR.position / (ENCODER_STEPS * RATIO) * front_wheel_size;
-            mainDataStruct.RL_position = (float)state_RL.position / (ENCODER_STEPS * RATIO) * rear_wheel_size;
-            mainDataStruct.RR_position = (float)state_RR.position / (ENCODER_STEPS * RATIO) * rear_wheel_size;
+            mainDataStruct.FL_position = (float)state_FL.position / (FL_ENCODER_STEPS * RATIO) * front_wheel_size;
+            mainDataStruct.FR_position = (float)state_FR.position / (FR_ENCODER_STEPS * RATIO) * front_wheel_size;
+            mainDataStruct.RL_position = (float)state_RL.position / (RL_ENCODER_STEPS * RATIO) * rear_wheel_size;
+            mainDataStruct.RR_position = (float)state_RR.position / (RR_ENCODER_STEPS * RATIO) * rear_wheel_size;
 
             mainDataStruct.FL_speed = (mainDataStruct.FL_position - FL_prev_position) * ODOM_TASK_FREQ;
             mainDataStruct.FR_speed = (mainDataStruct.FR_position - FR_prev_position) * ODOM_TASK_FREQ;
@@ -168,11 +168,13 @@ extern OpSys SystemHandles;
             mainDataStruct.RR_acceleration = (mainDataStruct.RR_speed - RR_prev_speed) * ODOM_TASK_FREQ;
 
             AS5040_read(&angle_sensor, &mainDataStruct.steering_position);
+            mainDataStruct.steering_speed = (mainDataStruct.steering_position - steering_prev_position) * ODOM_TASK_FREQ;
 
             FL_prev_position = mainDataStruct.FL_position;
             FR_prev_position = mainDataStruct.FR_position;
             RL_prev_position = mainDataStruct.RL_position;
             RR_prev_position = mainDataStruct.RR_position;
+            steering_prev_position = mainDataStruct.steering_position;
 
             FL_prev_speed = mainDataStruct.FL_speed;
             FR_prev_speed = mainDataStruct.FR_speed;

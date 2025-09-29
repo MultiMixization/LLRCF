@@ -326,6 +326,8 @@ extern OpSys SystemHandles;
                     RL_error_integral = 0.0;
                     RR_control_value = 0.0;
                     RR_error_integral = 0.0;
+                    steering_control_value = 0.0;
+                    steering_error_integral = 0.0;
                 }
                 xSemaphoreGive(SystemHandles.RobotDataAccess);
             #endif  
@@ -335,7 +337,7 @@ extern OpSys SystemHandles;
                 FR_control_value >= 0 ? gpio_set_level(FR_MOTOR_DIR, !FLIP_FR_MOTOR_DIRECTION) : gpio_set_level(FR_MOTOR_DIR, FLIP_FR_MOTOR_DIRECTION);
                 RL_control_value >= 0 ? gpio_set_level(RL_MOTOR_DIR, !FLIP_RL_MOTOR_DIRECTION) : gpio_set_level(RL_MOTOR_DIR, FLIP_RL_MOTOR_DIRECTION);
                 RR_control_value >= 0 ? gpio_set_level(RR_MOTOR_DIR, !FLIP_RR_MOTOR_DIRECTION) : gpio_set_level(RR_MOTOR_DIR, FLIP_RR_MOTOR_DIRECTION);
-                steering_control_value >= 0 ? gpio_set_level(STEERING_MOTOR_DIR, 0) : gpio_set_level(STEERING_MOTOR_DIR, 1);
+                steering_control_value >= 0 ? gpio_set_level(STEERING_MOTOR_DIR, !STEERING_FLIP_DIRECTION) : gpio_set_level(STEERING_MOTOR_DIR, STEERING_FLIP_DIRECTION);
 
                 checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, abs(FL_control_value)));
                 checkError(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, abs(FR_control_value)));

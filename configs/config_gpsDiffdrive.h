@@ -22,7 +22,7 @@
     *   1   -   Class (2, 0)
     *   2   -   Class (1, 1)
     */
-    #define ROBOT_CLASS 2
+    #define ROBOT_CLASS 1
 
     /*
     *   You need to declare what kind of motor drivers the robot uses.
@@ -98,7 +98,7 @@
     #define ACCESORY_1_BASE_STATE 1 //Starting state of the pin controlling the accesory 1
     //#define ACCESORY_2_BASE_STATE 1 //Starting state of the pin controlling the accesory 2
 
-    #define SAFETY_SWITCH
+    //#define SAFETY_SWITCH
 
     #define DEBUG_MSSGS             //Send human readable messages that do not conform to the formal standard. Comment this option for deployment.
 

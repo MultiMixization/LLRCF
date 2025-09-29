@@ -22,7 +22,7 @@
     *   1   -   Class (2, 0)
     *   2   -   Class (1, 1)
     */
-    #define ROBOT_CLASS 2
+    #define ROBOT_CLASS 1
 
     /*
     *   You need to declare what kind of motor drivers the robot uses.
@@ -31,7 +31,7 @@
     *   1   -   PWM and DIR pins line a Cytron MDD20A dual channel motor driver 
     *   2   -   two PWM pins like a BTS7960 IBT2 dual channel motor driver
     */
-    #define CONTROL_SCHEME 1
+    #define CONTROL_SCHEME 2
 
     #if ROBOT_CLASS == 1
         #define FLIP_LEFT_MOTOR_DIRECTION true
@@ -98,7 +98,7 @@
     #define ACCESORY_1_BASE_STATE 1 //Starting state of the pin controlling the accesory 1
     //#define ACCESORY_2_BASE_STATE 1 //Starting state of the pin controlling the accesory 2
 
-    #define SAFETY_SWITCH
+    //#define SAFETY_SWITCH
 
     #define DEBUG_MSSGS             //Send human readable messages that do not conform to the formal standard. Comment this option for deployment.
 

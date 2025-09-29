@@ -6,6 +6,8 @@ Low Level Robot Control Framework is an ESP32 based framework that allows for co
 
 To configure the framework to fit your implementation please change values in include/config.h
 
+Premade configuration files are availeable in the config folder. To use them simply replace the config.h file in the include folder with a selected configuration file.
+
 # Communication frame
 
 The software uses a simple ASCII frames to communicate with other devices.

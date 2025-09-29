@@ -306,11 +306,33 @@ void comm_task()
                 }
                 else if (strcmp(cmd, "CAO") == 0)                   /** Change steering angle offset. */
                 {
-                    strncpy(temp1, inputData + 8, 6);
+                    strncpy(temp1, inputData + 7, 6);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     constantsDataStruct.angle_offset = strtof(temp1, NULL);
                     #ifdef DEBUG_MSSGS
-                        sprintf(outputFrame, "Changed steering angle offset to %7.4f\n", constantsDataStruct.angle_offset);
+                        sprintf(outputFrame, "Changed steering angle offset to %7.2f\n", constantsDataStruct.angle_offset);
+                    #endif
+                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    saveConstantsToFlash();
+                }
+                else if (strcmp(cmd, "CAX") == 0)                   /** Change steering angle maximum value. */
+                {
+                    strncpy(temp1, inputData + 7, 6);
+                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                    constantsDataStruct.angle_max = strtof(temp1, NULL);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Changed steering angle maximum value to %7.2f\n", constantsDataStruct.angle_max);
+                    #endif
+                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    saveConstantsToFlash();
+                }
+                else if (strcmp(cmd, "CAN") == 0)                   /** Change steering angle minimum value. */
+                {
+                    strncpy(temp1, inputData + 7, 6);
+                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                    constantsDataStruct.angle_min = strtof(temp1, NULL);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Changed steering angle minimum value to %7.2f\n", constantsDataStruct.angle_min);
                     #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
@@ -319,7 +341,7 @@ void comm_task()
                 {
                     #ifdef DEBUG_MSSGS
                         xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                        sprintf(outputFrame, "Current constants\nFront wheel size: %7.3f\nFront wheel spacing: %7.3f\nRear wheel_size: %7.3f\nRear_wheel_separation: %7.3f\nVelocity KP: %7.3f\nVelocity KI: %7.3f\n", constantsDataStruct.front_wheel_size, constantsDataStruct.front_wheel_separation, constantsDataStruct.rear_wheel_size, constantsDataStruct.rear_wheel_separation, constantsDataStruct.velocity_KP, constantsDataStruct.velocity_KI);
+                        sprintf(outputFrame, "Current constants\nFront wheel size: %7.3f\nFront wheel spacing: %7.3f\nRear wheel_size: %7.3f\nRear_wheel_separation: %7.3f\nVelocity KP: %7.3f\nVelocity KI: %7.3f\nAngle KP: %7.3f\nAngle KI:%7.3f", constantsDataStruct.front_wheel_size, constantsDataStruct.front_wheel_separation, constantsDataStruct.rear_wheel_size, constantsDataStruct.rear_wheel_separation, constantsDataStruct.velocity_KP, constantsDataStruct.velocity_KI, constantsDataStruct.angle_KP, constantsDataStruct.angle_KI);
                         xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     #endif
                 }
@@ -350,7 +372,7 @@ void comm_task()
         else                                                        /** Default - no command, only send data. */
         {
             xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-            sprintf(outputFrame, "%s;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", ROBOT_ID, mainDataStruct.RL_speed, mainDataStruct.RR_speed, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
+            sprintf(outputFrame, "%s;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", ROBOT_ID, mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
             xSemaphoreGive(SystemHandles.RobotDataAccess);
         }
         uart_write_bytes(UART_PORT_NUM, outputFrame, strlen(outputFrame));

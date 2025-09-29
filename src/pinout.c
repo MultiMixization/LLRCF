@@ -68,6 +68,9 @@ void pinInit()
 
         esp_rom_gpio_pad_select_gpio(RR_MOTOR_DIR);
         gpio_set_direction(RR_MOTOR_DIR, GPIO_MODE_OUTPUT);
+
+        esp_rom_gpio_pad_select_gpio(STEERING_MOTOR_DIR);
+        gpio_set_direction(STEERING_MOTOR_DIR, GPIO_MODE_OUTPUT);
     #else
          #error Unrecognized robot class
     #endif
@@ -194,6 +197,10 @@ void resetFlash()
         constantsDataStruct.angle_KP = 100.0;
         constantsDataStruct.angle_KI = 10.0;
         constantsDataStruct.angle_KD = 1.0;
+
+        constantsDataStruct.angle_offset = 0.0;
+        constantsDataStruct.angle_max = 30.0;
+        constantsDataStruct.angle_min = -30.0;
     #else
          #error Unrecognized robot class
     #endif

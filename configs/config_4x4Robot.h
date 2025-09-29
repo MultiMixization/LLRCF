@@ -98,7 +98,7 @@
     #define ACCESORY_1_BASE_STATE 1 //Starting state of the pin controlling the accesory 1
     //#define ACCESORY_2_BASE_STATE 1 //Starting state of the pin controlling the accesory 2
 
-    #define SAFETY_SWITCH
+    //#define SAFETY_SWITCH
 
     #define DEBUG_MSSGS             //Send human readable messages that do not conform to the formal standard. Comment this option for deployment.
 

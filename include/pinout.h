@@ -62,8 +62,8 @@
     #define RR_ENCODER_A GPIO_NUM_25
     #define RR_ENCODER_B GPIO_NUM_26
 
-    #define ANGLE_SENSOR_CS GPIO_NUM_15
-    #define ANGLE_SENSOR_CLK GPIO_NUM_14
+    #define ANGLE_SENSOR_CS GPIO_NUM_14
+    #define ANGLE_SENSOR_CLK GPIO_NUM_15
     #define ANGLE_SENSOR_DATA GPIO_NUM_12
 
 //--------------------------------- Motors ---------------------------------
