@@ -49,7 +49,7 @@
     #define RESET_AT          0         // Set to a positive non-zero number to reset the position if this value is exceeded.
     #if ROBOT_CLASS == 1
         #define FLIP_DIRECTION true         // Set to true to reverse the clockwise/counterclockwise sense.
-        #define ENCODER_STEPS 1024.0
+        #define ENCODER_STEPS 4096.0
     #elif ROBOT_CLASS == 2
         #define FL_FLIP_DIRECTION true      // Set to true to reverse the clockwise/counterclockwise sense for front left wheel.
         #define FR_FLIP_DIRECTION false     // Set to true to reverse the clockwise/counterclockwise sense for front right wheel.
@@ -99,6 +99,9 @@
     //#define ACCESORY_2_BASE_STATE 1 //Starting state of the pin controlling the accesory 2
 
     //#define SAFETY_SWITCH
+    #ifdef SAFETY_SWITCH
+        //#define SAFETY_SWITCH_INVERT
+    #endif
 
     #define DEBUG_MSSGS             //Send human readable messages that do not conform to the formal standard. Comment this option for deployment.
 

@@ -43,7 +43,11 @@ esp_err_t AS5040_read(AS5040_info *info, float *position)
 
     *position = (value >> 6) & 0x03FF;
     uint8_t status = value & 0x3F;
-    *position = *position * 360.0 / 1024.0 + info->offset;
+    *position = (*position * 2.0 * M_PI / 1024.0);
+
+    if(info->invert_reading == true) *position = -*position;
+
+    *position = *position + info->offset;
 
     if ((status >> 4) & 0x01) ret = ESP_ERR_INVALID_CRC;
     if ((status >> 3) & 0x01) ret = ESP_FAIL;
@@ -75,7 +79,9 @@ esp_err_t AS5040_read_all(AS5040_info *info, float *position, bool devinfo[])
     for (int i = 0; i < 6; i++) {
         devinfo[i] = (status >> i) & 0x01;
     }
-    *position = *position * 360.0 / 1024.0 + info->offset;
+    *position = * position * 2.0 * M_PI / 1024.0;
+    if(info->invert_reading == true) *position = -*position;
+    *position = *position + info->offset;
     return ret;
 }
 

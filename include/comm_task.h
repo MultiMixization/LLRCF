@@ -11,11 +11,12 @@
 #include <driver/uart.h>
 
 #include <string.h>
+#include <math.h>
 
 #include "pinout.h"
 
 #define UART_BAUD_RATE 115200
-#define BUFF_SIZE 256
+#define BUFF_SIZE 384
 
 /*
 * @brief Task responsible for communication between the uC and controlling computer.

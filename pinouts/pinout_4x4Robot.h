@@ -1,0 +1,123 @@
+/**
+ * @file pinout.h
+ * @brief Header file containing pin definitions for the microcontroller as well as funtions for initiating them and data structures.
+ */
+
+#ifndef PINOUT_H
+#define PINOUT_H
+
+#include <esp_system.h>
+#include <driver/gpio.h>
+#include <driver/uart.h>
+#include <math.h>
+
+#include "nvs_flash.h"
+#include "nvs.h"
+
+#include "data_structures.h"
+#include "config.h"
+
+#define UART_PORT_NUM 1
+#define UART_TX_PIN GPIO_NUM_1
+#define UART_RX_PIN GPIO_NUM_3
+
+#if ACCESORY_1_TYPE != 0
+    #define ACCESORY_PORT_1 
+#endif
+
+#if ACCESORY_2_TYPE != 0
+    #define ACCESORY_PORT_2 GPIO_NUM_13
+#endif
+
+#ifdef SAFETY_SWITCH
+    #define SAFETY_SWITCH_PIN GPIO_NUM_2
+#endif
+
+#if ROBOT_CLASS == 1
+//--------------------------------- Encoders ---------------------------------
+    #define LEFT_ENCODER_A GPIO_NUM_4
+    #define LEFT_ENCODER_B GPIO_NUM_34
+
+    #define RIGHT_ENCODER_A GPIO_NUM_19
+    #define RIGHT_ENCODER_B GPIO_NUM_21
+
+//--------------------------------- Motors ---------------------------------
+    #define LEFT_MOTOR_DIR GPIO_NUM_32
+    #define LEFT_MOTOR_PWM GPIO_NUM_27
+
+    #define RIGHT_MOTOR_DIR GPIO_NUM_33
+    #define RIGHT_MOTOR_PWM GPIO_NUM_13
+
+#elif ROBOT_CLASS == 2
+
+    #define FL_ENCODER_A GPIO_NUM_36
+    #define FL_ENCODER_B GPIO_NUM_39
+
+    #define FR_ENCODER_A GPIO_NUM_34
+    #define FR_ENCODER_B GPIO_NUM_35
+
+    #define RL_ENCODER_A GPIO_NUM_32
+    #define RL_ENCODER_B GPIO_NUM_33
+
+    #define RR_ENCODER_A GPIO_NUM_25
+    #define RR_ENCODER_B GPIO_NUM_26
+
+    #define ANGLE_SENSOR_CS GPIO_NUM_14
+    #define ANGLE_SENSOR_CLK GPIO_NUM_15
+    #define ANGLE_SENSOR_DATA GPIO_NUM_12
+
+//--------------------------------- Motors ---------------------------------
+    #define FL_MOTOR_DIR GPIO_NUM_23
+    #define FL_MOTOR_PWM GPIO_NUM_22
+
+    #define FR_MOTOR_DIR GPIO_NUM_21
+    #define FR_MOTOR_PWM GPIO_NUM_19
+
+    #define RR_MOTOR_DIR GPIO_NUM_18
+    #define RR_MOTOR_PWM GPIO_NUM_5
+    
+    #define RL_MOTOR_DIR GPIO_NUM_17
+    #define RL_MOTOR_PWM GPIO_NUM_16
+
+    #define STEERING_MOTOR_DIR GPIO_NUM_4
+    #define STEERING_MOTOR_PWM GPIO_NUM_0
+#else 
+    #error Unrecognized robot class.
+#endif
+
+/*
+* @brief Function responsible for initialization of uC pins.
+*/
+void pinInit();
+
+/*
+* @brief Function responsible for initialization of the volatile variables.
+*/
+void dataInit();
+
+/*
+* @brief Functon used for reading the persistant variables from uC flash memory.
+*/
+void readConstantsFromFlash();
+
+/*
+* @brief Function used for overwriting persistent variables in the uC flash memory.
+*/
+void saveConstantsToFlash();
+
+/*
+* @brief Function used for reseting all persistant variables to known hard-coded values. 
+*/
+void resetFlash();
+
+/*
+* @brief Function used to pass any esp_err_t codes to the communication task.
+*
+* The function checks if the passed argument "state" is different than ESP_OK.
+* If yes then the content of said argument is added to a queue to be sent to the master device.
+*
+* @param state Error code returned by a different function.
+*/
+void checkError(esp_err_t state);
+
+#endif

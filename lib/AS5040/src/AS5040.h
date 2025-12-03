@@ -14,6 +14,8 @@
 #include "esp_err.h"
 #include "driver/gpio.h"
 
+#include "math.h"
+
 /**
  * @struct AS5040_info
  * @brief Struct representing the current state of device.
@@ -24,6 +26,7 @@ typedef struct
     gpio_num_t pin_data;
     gpio_num_t pin_cs;
     float offset;
+    bool invert_reading;
 }AS5040_info;
 
 /**
@@ -36,7 +39,7 @@ esp_err_t AS5040_init(AS5040_info *info);
 /**
  * @brief Read the current angle determined by the AS5040 sensor.
  * @param[in] info Pointer to a structure holding informations about AS5040 sensor.
- * @param[out] position Pointer to a value that will hold the result of the reading operation.
+ * @param[out] position Pointer to a value that will hold the result of the reading operation. The value returned is measured in radians.
  * @return Returns ESP_OK if reading is succesfull.
  */
 esp_err_t AS5040_read(AS5040_info *info, float *position);

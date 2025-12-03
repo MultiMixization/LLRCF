@@ -99,6 +99,9 @@
     //#define ACCESORY_2_BASE_STATE 1 //Starting state of the pin controlling the accesory 2
 
     //#define SAFETY_SWITCH
+    #ifdef SAFETY_SWITCH
+        //#define SAFETY_SWITCH_INVERT    //Uncomment if the logic of the safety switch is inverted.
+    #endif
 
     #define DEBUG_MSSGS             //Send human readable messages that do not conform to the formal standard. Comment this option for deployment.
 

@@ -33,7 +33,7 @@ void comm_task()
         intr_alloc_flags = ESP_INTR_FLAG_IRAM;
     #endif
 
-    checkError(uart_driver_install(UART_PORT_NUM, BUFF_SIZE * 2, 0, 0, NULL, intr_alloc_flags));
+    checkError(uart_driver_install(UART_PORT_NUM, BUFF_SIZE, BUFF_SIZE, 0, NULL, intr_alloc_flags));
     checkError(uart_param_config(UART_PORT_NUM, &uart_config));
     checkError(uart_set_pin(UART_PORT_NUM, UART_TX_PIN, UART_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
@@ -105,7 +105,9 @@ void comm_task()
                     strncpy(temp1, inputData + 7, 6);
                     strncpy(temp2, inputData + 14, 6);
                     strncpy(&temp3, inputData + 21, 1);
-                    gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
+                    #if ACCESORY_1_TYPE != 0
+                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
+                    #endif
                     xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     mainDataStruct.right_wheel_target_speed = (strtof(temp1, NULL) + strtof(temp2, NULL) * constantsDataStruct.wheel_separation / 2.0);
@@ -187,7 +189,7 @@ void comm_task()
                     xSemaphoreGive(SystemHandles.RobotDataAccess);
                 }
                 #elif ROBOT_CLASS == 2
-                else if (strcmp(cmd, "CKP") == 0)                   /** Change value of P coefficient for angle or speed controling PI controller. */
+                else if (strcmp(cmd, "CKP") == 0)                   /** Change value of P coefficient for angle or speed controling PID controller. */
                 {
                     strncpy(temp1, inputData + 7, 1);
                     strncpy(temp2, inputData + 9, 7);
@@ -212,7 +214,7 @@ void comm_task()
                         saveConstantsToFlash();
                     }
                 }
-                else if (strcmp(cmd, "CKI") == 0)                   /** Change value of I coefficient for angle or speed controling PI controller. */
+                else if (strcmp(cmd, "CKI") == 0)                   /** Change value of I coefficient for angle or speed controling PID controller. */
                 {
                     strncpy(temp1, inputData + 7, 1);
                     strncpy(temp2, inputData + 9, 7);
@@ -237,69 +239,71 @@ void comm_task()
                         saveConstantsToFlash();
                     }
                 }
-                else if (strcmp(cmd, "WHD") == 0)                   /** Change sizes of front or back wheels. */
+                else if (strcmp(cmd, "CKD") == 0)                   /** Change value of D coefficient for angle or speed controling PID controller. */
                 {
                     strncpy(temp1, inputData + 7, 1);
                     strncpy(temp2, inputData + 9, 7);
-                    switch (strtol(temp1, NULL, 10))
+                    if (strtol(temp1, NULL, 10) == 1)
                     {
-                    case 1:
                         xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                        constantsDataStruct.front_wheel_size = strtof(temp2, NULL);
+                        constantsDataStruct.velocity_KD = strtof(temp2, NULL);
                         #ifdef DEBUG_MSSGS
-                            sprintf(outputFrame, "Changed front wheels sizes to %7.4f\n", constantsDataStruct.front_wheel_size);
+                            sprintf(outputFrame, "Changed velocity KD to %7.3f\n", constantsDataStruct.velocity_KD);
                         #endif
                         xSemaphoreGive(SystemHandles.ConstantDataAccess);
                         saveConstantsToFlash();
-                        break;
-                    case 2:
-                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                        constantsDataStruct.rear_wheel_size = strtof(temp2, NULL);
-                        #ifdef DEBUG_MSSGS
-                            sprintf(outputFrame, "Changed rear wheels sizes to %7.4f\n", constantsDataStruct.rear_wheel_size);
-                        #endif
-                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
-                        saveConstantsToFlash();
-                        break;
-                    default:
-                        break;
                     }
+                    else if (strtol(temp1, NULL, 10) == 2)
+                    {
+                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                        constantsDataStruct.angle_KD = strtof(temp2, NULL);
+                        #ifdef DEBUG_MSSGS
+                            sprintf(outputFrame, "Changed angle KD to %7.3f\n", constantsDataStruct.angle_KD);
+                        #endif
+                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                        saveConstantsToFlash();
+                    } 
                 }
-                else if (strcmp(cmd, "WHS") == 0)                   /** Change separation of front or back wheels. */
+                else if (strcmp(cmd, "WHD") == 0)                   /** Change wheel size. */
                 {
-                    strncpy(temp1, inputData + 7, 1);
-                    strncpy(temp2, inputData + 9, 7);
-                    switch (strtol(temp1, NULL, 10))
-                    {
-                    case 1:
-                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                        constantsDataStruct.front_wheel_separation = strtof(temp2, NULL);
-                        #ifdef DEBUG_MSSGS
-                            sprintf(outputFrame, "Changed front wheels separation to %7.4f\n", constantsDataStruct.front_wheel_separation);
-                        #endif
-                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
-                        saveConstantsToFlash();
-                        break;
-                    case 2:
-                        xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                        constantsDataStruct.rear_wheel_separation = strtof(temp2, NULL);
-                        #ifdef DEBUG_MSSGS
-                            sprintf(outputFrame, "Changed rear wheels separation to %7.4f\n", constantsDataStruct.rear_wheel_separation);
-                        #endif
-                        xSemaphoreGive(SystemHandles.ConstantDataAccess);
-                        saveConstantsToFlash();
-                        break;
-                    default:
-                        break;
-                    }
+                    strncpy(temp1, inputData + 7, 7);
+                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                    constantsDataStruct.wheel_size = strtof(temp1, NULL);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Changed wheel size to %7.4f\n", constantsDataStruct.wheel_size);
+                    #endif
+                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    saveConstantsToFlash();
+                }
+                else if (strcmp(cmd, "WHS") == 0)                   /** Change horizontal separation of wheels. */
+                {
+                    strncpy(temp1, inputData + 7, 7);
+                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                    constantsDataStruct.wheel_separation = strtof(temp1, NULL);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Changed horizontal wheel separation to %7.4f\n", constantsDataStruct.wheel_separation);
+                    #endif
+                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    saveConstantsToFlash();
                 }
                 else if (strcmp(cmd, "WJL") == 0)                   /** Change distance between axles. */
                 {
-                    strncpy(temp1, inputData + 8, 6);
+                    strncpy(temp1, inputData + 7, 6);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                    constantsDataStruct.front_wheel_longitudinal_distance = strtof(temp1, NULL);
+                    constantsDataStruct.wheel_longitudinal_distance = strtof(temp1, NULL);
                     #ifdef DEBUG_MSSGS
-                        sprintf(outputFrame, "Changed distance between axles to %7.4f\n", constantsDataStruct.front_wheel_longitudinal_distance);
+                        sprintf(outputFrame, "Changed distance between axles to %7.4f\n", constantsDataStruct.wheel_longitudinal_distance);
+                    #endif
+                    xSemaphoreGive(SystemHandles.ConstantDataAccess);
+                    saveConstantsToFlash();
+                }
+                else if (strcmp(cmd, "WHW") == 0)                   /** Change wheel width. */
+                {
+                    strncpy(temp1, inputData + 7, 6);
+                    xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
+                    constantsDataStruct.wheel_width = strtof(temp1, NULL);
+                    #ifdef DEBUG_MSSGS
+                        sprintf(outputFrame, "Changed wheel width to %7.4f\n", constantsDataStruct.wheel_width);
                     #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
@@ -310,7 +314,7 @@ void comm_task()
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     constantsDataStruct.angle_offset = strtof(temp1, NULL);
                     #ifdef DEBUG_MSSGS
-                        sprintf(outputFrame, "Changed steering angle offset to %7.2f\n", constantsDataStruct.angle_offset);
+                        sprintf(outputFrame, "Changed steering angle offset to %7.4f\n", constantsDataStruct.angle_offset);
                     #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
@@ -321,7 +325,7 @@ void comm_task()
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     constantsDataStruct.angle_max = strtof(temp1, NULL);
                     #ifdef DEBUG_MSSGS
-                        sprintf(outputFrame, "Changed steering angle maximum value to %7.2f\n", constantsDataStruct.angle_max);
+                        sprintf(outputFrame, "Changed steering angle maximum value to %7.4f\n", constantsDataStruct.angle_max);
                     #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
@@ -332,7 +336,7 @@ void comm_task()
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
                     constantsDataStruct.angle_min = strtof(temp1, NULL);
                     #ifdef DEBUG_MSSGS
-                        sprintf(outputFrame, "Changed steering angle minimum value to %7.2f\n", constantsDataStruct.angle_min);
+                        sprintf(outputFrame, "Changed steering angle minimum value to %7.4f\n", constantsDataStruct.angle_min);
                     #endif
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     saveConstantsToFlash();
@@ -341,7 +345,7 @@ void comm_task()
                 {
                     #ifdef DEBUG_MSSGS
                         xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                        sprintf(outputFrame, "Current constants\nFront wheel size: %7.3f\nFront wheel spacing: %7.3f\nRear wheel_size: %7.3f\nRear_wheel_separation: %7.3f\nVelocity KP: %7.3f\nVelocity KI: %7.3f\nAngle KP: %7.3f\nAngle KI:%7.3f", constantsDataStruct.front_wheel_size, constantsDataStruct.front_wheel_separation, constantsDataStruct.rear_wheel_size, constantsDataStruct.rear_wheel_separation, constantsDataStruct.velocity_KP, constantsDataStruct.velocity_KI, constantsDataStruct.angle_KP, constantsDataStruct.angle_KI);
+                        sprintf(outputFrame, "Current constants:\nWheel size: %7.3f\nWheel longitudinal spacing: %7.3f\nWheel horizontal separation: %7.3f\nWheel width: %7.3f\nSteering minimum angle: %7.2f\nSteering maximum angle: %7.2f\nSteering offset: %7.2f\nVelocity KP: %7.3f\nVelocity KI: %7.3f\nVelocity KD: %7.3f\nAngle KP: %7.3f\nAngle KI:%7.3f\nAngle KD:%7.3f\n", constantsDataStruct.wheel_size, constantsDataStruct.wheel_longitudinal_distance, constantsDataStruct.wheel_separation,  constantsDataStruct.wheel_width, constantsDataStruct.angle_min, constantsDataStruct.angle_max, constantsDataStruct.angle_offset, constantsDataStruct.velocity_KP, constantsDataStruct.velocity_KI,constantsDataStruct.velocity_KD, constantsDataStruct.angle_KP, constantsDataStruct.angle_KI, constantsDataStruct.angle_KD);
                         xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     #endif
                 }
@@ -355,11 +359,13 @@ void comm_task()
                     #endif
                     xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-                    mainDataStruct.FL_target_speed = strtof(temp1, NULL);
-                    mainDataStruct.FR_target_speed = strtof(temp1, NULL);
-                    mainDataStruct.RL_target_speed = strtof(temp1, NULL);
-                    mainDataStruct.RR_target_speed = strtof(temp1, NULL);   //Dorzucić kiedyś różne prędkości kół przy skrętach (elektroniczny dyferencjał)
                     mainDataStruct.steering_target_position = strtof(temp2, NULL);
+                    float target_speed = strtof(temp1, NULL);
+                    float turning_radius = constantsDataStruct.wheel_longitudinal_distance / tan(mainDataStruct.steering_position);
+                    mainDataStruct.FL_target_speed = target_speed / cos(mainDataStruct.steering_position) * (turning_radius - constantsDataStruct.wheel_separation * 0.5) / turning_radius;
+                    mainDataStruct.FR_target_speed = target_speed / cos(mainDataStruct.steering_position) * (turning_radius + constantsDataStruct.wheel_separation * 0.5) / turning_radius;
+                    mainDataStruct.RL_target_speed = target_speed * (turning_radius - constantsDataStruct.wheel_separation * 0.5) / turning_radius;
+                    mainDataStruct.RR_target_speed = target_speed * (turning_radius + constantsDataStruct.wheel_separation * 0.5) / turning_radius;
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
                     sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
                     xSemaphoreGive(SystemHandles.RobotDataAccess);

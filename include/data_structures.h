@@ -102,11 +102,10 @@ typedef struct
         float KI;                               /** Value of the integral term multiplier. */
 
     #elif ROBOT_CLASS == 2
-        float front_wheel_size;                 /** Size of the front wheels. */
-        float rear_wheel_size;                  /** Size of the rear wheels. */
-        float front_wheel_separation;           /** Distance between the front wheels of the robot. */
-        float rear_wheel_separation;            /** Distance between the rear wheels of the robot. */
-        float front_wheel_longitudinal_distance;/** Longitudinal distance between the front axle and rear axle of the robot. */
+        float wheel_size;                       /** Size of the wheels. */
+        float wheel_width;                      /** Width of the wheels. */
+        float wheel_separation;                 /** Distance between the rear wheels of the robot. */
+        float wheel_longitudinal_distance;      /** Longitudinal distance between the front axle and rear axle of the robot. */
 
         float velocity_KP;                      /** Value of the proportional term multiplier for the velocity controling PID controllers. */
         float velocity_KI;                      /** Value of the integral term multiplier for the velocity controling PID controllers. */

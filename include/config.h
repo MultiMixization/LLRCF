@@ -55,7 +55,7 @@
         #define FR_FLIP_DIRECTION false     // Set to true to reverse the clockwise/counterclockwise sense for front right wheel.
         #define RL_FLIP_DIRECTION true      // Set to true to reverse the clockwise/counterclockwise sense for rear left wheel.
         #define RR_FLIP_DIRECTION false     // Set to true to reverse the clockwise/counterclockwise sense for rear right wheel.
-        #define STEERING_FLIP_DIRECTION true
+        #define STEERING_FLIP_DIRECTION false
 
         #define FL_ENCODER_STEPS 4096.0
         #define FR_ENCODER_STEPS 1024.0
@@ -98,7 +98,10 @@
     #define ACCESORY_1_BASE_STATE 1 //Starting state of the pin controlling the accesory 1
     //#define ACCESORY_2_BASE_STATE 1 //Starting state of the pin controlling the accesory 2
 
-    #define SAFETY_SWITCH
+    #define SAFETY_SWITCH           //Uncomment if the robot is equipped with a safety switch connected to the microcontroller.
+    #ifdef SAFETY_SWITCH
+        //#define SAFETY_SWITCH_INVERT    //Uncomment if the logic of the safety switch is inverted.
+    #endif
 
     #define DEBUG_MSSGS             //Send human readable messages that do not conform to the formal standard. Comment this option for deployment.
 

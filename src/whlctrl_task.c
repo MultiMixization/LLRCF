@@ -126,6 +126,25 @@ extern OpSys SystemHandles;
             if(right_error_integral >= PID_ERROR_LIMIT) right_error_integral = PID_ERROR_LIMIT;
             if(right_error_integral <= -PID_ERROR_LIMIT) right_error_integral = -PID_ERROR_LIMIT;
 
+            #ifdef SAFETY_SWITCH
+                xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
+                #ifdef SAFETY_SWITCH_INVERT 
+                    mainDataStruct.safety_switch_state = !gpio_get_level(SAFETY_SWITCH_PIN);
+                #endif
+                #ifndef SAFETY_SWITCH_INVERT 
+                    mainDataStruct.safety_switch_state = gpio_get_level(SAFETY_SWITCH_PIN);
+                #endif
+
+                if(mainDataStruct.safety_switch_state)
+                {
+                    right_ctrl_value = 0.0;
+                    left_ctrl_value = 0.0;
+                    right_error_integral = 0.0;
+                    left_error_integral = 0.0;
+                }
+                xSemaphoreGive(SystemHandles.RobotDataAccess);
+            #endif
+
             #if CONTROL_SCHEME == 1
                 if(left_ctrl_value > 0)
                 {
@@ -273,12 +292,13 @@ extern OpSys SystemHandles;
             RL_error_integral += (mainDataStruct.RL_target_speed - mainDataStruct.RL_speed);
             RR_error_integral += (mainDataStruct.RR_target_speed - mainDataStruct.RR_speed);
             steering_error_integral += (mainDataStruct.steering_position - mainDataStruct.steering_target_position);
+            
 
-            FL_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.FL_target_speed - mainDataStruct.FL_speed) + constantsDataStruct.velocity_KI * FL_error_integral + constantsDataStruct.velocity_KD * (0);
-            FR_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.FR_target_speed - mainDataStruct.FR_speed) + constantsDataStruct.velocity_KI * FR_error_integral + constantsDataStruct.velocity_KD * (0);
-            RL_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.RL_target_speed - mainDataStruct.RL_speed) + constantsDataStruct.velocity_KI * RL_error_integral + constantsDataStruct.velocity_KD * (0);
-            RR_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.RR_target_speed - mainDataStruct.RR_speed) + constantsDataStruct.velocity_KI * RR_error_integral + constantsDataStruct.velocity_KD * (0);
-            steering_control_value = constantsDataStruct.angle_KP * (mainDataStruct.steering_position - mainDataStruct.steering_target_position) + constantsDataStruct.angle_KI * steering_error_integral;
+            FL_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.FL_target_speed - mainDataStruct.FL_speed) + constantsDataStruct.velocity_KI * FL_error_integral + constantsDataStruct.velocity_KD * (-mainDataStruct.FL_acceleration);
+            FR_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.FR_target_speed - mainDataStruct.FR_speed) + constantsDataStruct.velocity_KI * FR_error_integral + constantsDataStruct.velocity_KD * (-mainDataStruct.FR_acceleration);
+            RL_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.RL_target_speed - mainDataStruct.RL_speed) + constantsDataStruct.velocity_KI * RL_error_integral + constantsDataStruct.velocity_KD * (-mainDataStruct.RL_acceleration);
+            RR_control_value = constantsDataStruct.velocity_KP * (mainDataStruct.RR_target_speed - mainDataStruct.RR_speed) + constantsDataStruct.velocity_KI * RR_error_integral + constantsDataStruct.velocity_KD * (-mainDataStruct.RR_acceleration);
+            steering_control_value = constantsDataStruct.angle_KP * (mainDataStruct.steering_position - mainDataStruct.steering_target_position) + constantsDataStruct.angle_KI * steering_error_integral + constantsDataStruct.angle_KD * (-mainDataStruct.steering_speed);
 
             xSemaphoreGive(SystemHandles.RobotDataAccess);
             xSemaphoreGive(SystemHandles.ConstantDataAccess); 
@@ -315,7 +335,13 @@ extern OpSys SystemHandles;
 
             #ifdef SAFETY_SWITCH
                 xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-                mainDataStruct.safety_switch_state = gpio_get_level(SAFETY_SWITCH_PIN);
+                #ifdef SAFETY_SWITCH_INVERT 
+                    mainDataStruct.safety_switch_state = !gpio_get_level(SAFETY_SWITCH_PIN);
+                #endif
+                #ifndef SAFETY_SWITCH_INVERT 
+                    mainDataStruct.safety_switch_state = gpio_get_level(SAFETY_SWITCH_PIN);
+                #endif
+
                 if(mainDataStruct.safety_switch_state)
                 {
                     FL_control_value = 0.0;

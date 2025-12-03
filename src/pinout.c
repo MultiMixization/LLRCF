@@ -88,8 +88,8 @@ void pinInit()
 
     #ifdef SAFETY_SWITCH
         esp_rom_gpio_pad_select_gpio(SAFETY_SWITCH_PIN);
-        gpio_set_pull_mode(SAFETY_SWITCH_PIN, GPIO_PULLDOWN_ONLY);
         gpio_set_direction(SAFETY_SWITCH_PIN, GPIO_MODE_INPUT);
+        gpio_set_pull_mode(SAFETY_SWITCH_PIN, GPIO_FLOATING);
     #endif
 
     gpio_install_isr_service(0);
@@ -184,11 +184,10 @@ void resetFlash()
         constantsDataStruct.KP = 100.0;
         constantsDataStruct.KI = 10.0;
     #elif ROBOT_CLASS == 2
-        constantsDataStruct.front_wheel_size = 0.1;
-        constantsDataStruct.rear_wheel_size = 0.1;
-        constantsDataStruct.front_wheel_separation = 1.0;
-        constantsDataStruct.rear_wheel_separation = 1.0;
-        constantsDataStruct.front_wheel_longitudinal_distance = 1.0;
+        constantsDataStruct.wheel_size = 0.1;
+        constantsDataStruct.wheel_width = 0.1;
+        constantsDataStruct.wheel_separation = 1.0;
+        constantsDataStruct.wheel_longitudinal_distance = 1.0;
 
         constantsDataStruct.velocity_KP = 100.0;
         constantsDataStruct.velocity_KI = 10.0;
@@ -199,8 +198,8 @@ void resetFlash()
         constantsDataStruct.angle_KD = 1.0;
 
         constantsDataStruct.angle_offset = 0.0;
-        constantsDataStruct.angle_max = 30.0;
-        constantsDataStruct.angle_min = -30.0;
+        constantsDataStruct.angle_max = 0.5;
+        constantsDataStruct.angle_min = 0.5;
     #else
          #error Unrecognized robot class
     #endif

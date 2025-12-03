@@ -78,10 +78,10 @@ extern OpSys SystemHandles;
 #elif ROBOT_CLASS == 2
     void odom_task()
     {
-        float front_wheel_size, rear_wheel_size, front_wheel_longitudinal_distance;
+        float wheel_size, front_wheel_longitudinal_distance;
         float FL_prev_position = 0.0, FR_prev_position = 0.0, RL_prev_position = 0.0, RR_prev_position = 0.0, steering_prev_position = 0.0;
-        float FL_prev_speed = 0.0, FR_prev_speed = 0.0, RL_prev_speed = 0.0, RR_prev_speed = 0.0;
-        float rot_diff = 0.0, avg_speed = 0.0, curr_eul[3];
+        float FL_prev_speed = 0.0, FR_prev_speed = 0.0, RL_prev_speed = 0.0, RR_prev_speed = 0.0, steering_prev_speed = 0.0;
+        float rot_diff = 0.0, avg_back_speed = 0.0, curr_eul[3];
         Quaternion rot_diff_quat;
 
         Quaternion_setIdentity(&rot_diff_quat);
@@ -128,15 +128,15 @@ extern OpSys SystemHandles;
         checkError(rotary_encoder_set_queue(&RR, RR_event_queue));
 
         xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
-        front_wheel_size = 2.0 * M_PI * constantsDataStruct.front_wheel_size;
-        rear_wheel_size = 2.0 * M_PI * constantsDataStruct.rear_wheel_size;
-        front_wheel_longitudinal_distance = constantsDataStruct.front_wheel_longitudinal_distance;
+        wheel_size = 2.0 * M_PI * constantsDataStruct.wheel_size;
+        front_wheel_longitudinal_distance = constantsDataStruct.wheel_longitudinal_distance;
 
         AS5040_info angle_sensor = {
             .pin_clk = ANGLE_SENSOR_CLK,
             .pin_cs = ANGLE_SENSOR_CS,
             .pin_data = ANGLE_SENSOR_DATA,
-            .offset = constantsDataStruct.angle_offset
+            .offset = constantsDataStruct.angle_offset,
+            .invert_reading = true
         };
         xSemaphoreGive(SystemHandles.ConstantDataAccess);
 
@@ -152,10 +152,10 @@ extern OpSys SystemHandles;
             checkError(rotary_encoder_get_state(&RR, &state_RR));
 
             xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-            mainDataStruct.FL_position = (float)state_FL.position / (FL_ENCODER_STEPS * RATIO) * front_wheel_size;
-            mainDataStruct.FR_position = (float)state_FR.position / (FR_ENCODER_STEPS * RATIO) * front_wheel_size;
-            mainDataStruct.RL_position = (float)state_RL.position / (RL_ENCODER_STEPS * RATIO) * rear_wheel_size;
-            mainDataStruct.RR_position = (float)state_RR.position / (RR_ENCODER_STEPS * RATIO) * rear_wheel_size;
+            mainDataStruct.FL_position = (float)state_FL.position / (FL_ENCODER_STEPS * RATIO) * wheel_size;
+            mainDataStruct.FR_position = (float)state_FR.position / (FR_ENCODER_STEPS * RATIO) * wheel_size;
+            mainDataStruct.RL_position = (float)state_RL.position / (RL_ENCODER_STEPS * RATIO) * wheel_size;
+            mainDataStruct.RR_position = (float)state_RR.position / (RR_ENCODER_STEPS * RATIO) * wheel_size;
 
             mainDataStruct.FL_speed = (mainDataStruct.FL_position - FL_prev_position) * ODOM_TASK_FREQ;
             mainDataStruct.FR_speed = (mainDataStruct.FR_position - FR_prev_position) * ODOM_TASK_FREQ;
@@ -169,28 +169,30 @@ extern OpSys SystemHandles;
 
             AS5040_read(&angle_sensor, &mainDataStruct.steering_position);
             mainDataStruct.steering_speed = (mainDataStruct.steering_position - steering_prev_position) * ODOM_TASK_FREQ;
+            mainDataStruct.steering_acceleration = (mainDataStruct.steering_speed - steering_prev_speed) * ODOM_TASK_FREQ;
 
             FL_prev_position = mainDataStruct.FL_position;
             FR_prev_position = mainDataStruct.FR_position;
             RL_prev_position = mainDataStruct.RL_position;
             RR_prev_position = mainDataStruct.RR_position;
             steering_prev_position = mainDataStruct.steering_position;
+            steering_prev_speed = mainDataStruct.steering_speed;
 
             FL_prev_speed = mainDataStruct.FL_speed;
             FR_prev_speed = mainDataStruct.FR_speed;
             RL_prev_speed = mainDataStruct.RL_speed;
             RR_prev_speed = mainDataStruct.RR_speed;
 
-            avg_speed = (mainDataStruct.FL_speed + mainDataStruct.FR_speed + mainDataStruct.RL_speed + mainDataStruct.RR_speed) / 4.0;
+            avg_back_speed = (mainDataStruct.RL_speed + mainDataStruct.RR_speed) / 2.0;
 
-            rot_diff = avg_speed * tan(mainDataStruct.steering_position) / (front_wheel_longitudinal_distance * ODOM_TASK_FREQ);
+            rot_diff = avg_back_speed * tan(mainDataStruct.steering_position) / front_wheel_longitudinal_distance / ODOM_TASK_FREQ;
 
             Quaternion_toEulerZYX(&mainDataStruct.orientation, curr_eul);
             Quaternion_setIdentity(&rot_diff_quat);
             Quaternion_fromZRotation(rot_diff, &rot_diff_quat);
 
-            mainDataStruct.pos_x = avg_speed * cos(curr_eul[2] + rot_diff) / ODOM_TASK_FREQ;
-            mainDataStruct.pos_y = avg_speed * sin(curr_eul[2] + rot_diff) / ODOM_TASK_FREQ; // Taken from Springers Handbook of Robotics 2nd edition page 1239
+            mainDataStruct.pos_x += avg_back_speed * cos(curr_eul[2] + rot_diff) / ODOM_TASK_FREQ;
+            mainDataStruct.pos_y += avg_back_speed * sin(curr_eul[2] + rot_diff) / ODOM_TASK_FREQ; // Taken from Springers Handbook of Robotics 2nd edition page 1239
 
             Quaternion_multiply(&rot_diff_quat, &mainDataStruct.orientation, &mainDataStruct.orientation);
             xSemaphoreGive(SystemHandles.RobotDataAccess);
