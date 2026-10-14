@@ -1,6 +1,6 @@
 /**
  * @file config.h
- * @brief File containing configuration variables for the project.
+ * @brief File containing configuration variables for the project. This file was made for the ROS1 diffdrive robots.
  */
 
 #ifndef CONFIG_H

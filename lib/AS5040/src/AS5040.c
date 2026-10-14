@@ -28,7 +28,7 @@ esp_err_t AS5040_read(AS5040_info *info, float *position)
     for (int i = 0; i < 16; i++) {
         // rising edge
         gpio_set_level(info->pin_clk, 0);
-        esp_rom_delay_us(1);  // min 500 ns -> this is about double
+        esp_rom_delay_us(1);  // min 500 ns
 
         // falling edge -> data valid
         gpio_set_level(info->pin_clk, 1);

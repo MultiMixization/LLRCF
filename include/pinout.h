@@ -1,6 +1,7 @@
 /**
  * @file pinout.h
- * @brief Header file containing pin definitions for the microcontroller as well as funtions for initiating them and data structures.
+ * @brief Header file containing pin definitions for the microcontroller as well as funtions for initiating them and data structures. 
+ * This file was made for the 4X4 robot.
  */
 
 #ifndef PINOUT_H
@@ -35,18 +36,18 @@
 
 #if ROBOT_CLASS == 1
 //--------------------------------- Encoders ---------------------------------
-    #define LEFT_ENCODER_A GPIO_NUM_27
-    #define LEFT_ENCODER_B GPIO_NUM_26
+    #define LEFT_ENCODER_A GPIO_NUM_4
+    #define LEFT_ENCODER_B GPIO_NUM_34
 
-    #define RIGHT_ENCODER_A GPIO_NUM_12
-    #define RIGHT_ENCODER_B GPIO_NUM_14
+    #define RIGHT_ENCODER_A GPIO_NUM_19
+    #define RIGHT_ENCODER_B GPIO_NUM_21
 
 //--------------------------------- Motors ---------------------------------
-    #define LEFT_MOTOR_DIR GPIO_NUM_5
-    #define LEFT_MOTOR_PWM GPIO_NUM_17
+    #define LEFT_MOTOR_DIR GPIO_NUM_32
+    #define LEFT_MOTOR_PWM GPIO_NUM_27
 
-    #define RIGHT_MOTOR_DIR GPIO_NUM_19
-    #define RIGHT_MOTOR_PWM GPIO_NUM_18
+    #define RIGHT_MOTOR_DIR GPIO_NUM_33
+    #define RIGHT_MOTOR_PWM GPIO_NUM_13
 
 #elif ROBOT_CLASS == 2
 

@@ -1,6 +1,7 @@
 /**
  * @file pinout.h
- * @brief Header file containing pin definitions for the microcontroller as well as funtions for initiating them and data structures.
+ * @brief Header file containing pin definitions for the microcontroller as well as funtions for initiating them and data structures. 
+ * This file was made for the gpsDiffdrive robot with ROS2.
  */
 
 #ifndef PINOUT_H

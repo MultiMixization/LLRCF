@@ -1,6 +1,6 @@
 /**
  * @file config.h
- * @brief File containing configuration variables for the project.
+ * @brief File containing configuration variables for the project. This config file was made for the 4X4 robot.
  */
 
 #ifndef CONFIG_H
