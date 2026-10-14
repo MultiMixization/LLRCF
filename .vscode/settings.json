@@ -1,6 +1,7 @@
 {
     "files.associations": {
-        "esp_system.h": "c"
+        "esp_system.h": "c",
+        "as5040.h": "c"
     },
     "python-envs.defaultEnvManager": "ms-python.python:system",
     "python-envs.pythonProjects": []

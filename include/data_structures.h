@@ -95,7 +95,7 @@ typedef struct
     uint32_t odometry_frequency;
     uint32_t wheel_ctrl_frequency;
     #if ROBOT_CLASS == 1
-        float wheel_size;                       /** Diameter of the wheel measured in m */
+        float wheel_size;                       /** Radius of the wheel measured in m */
         float wheel_separation;                 /** Distance between the wheels or the length of the axle measured in m */
 
         float KP;                               /** Value of the proportional term multiplier. */

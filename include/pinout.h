@@ -35,18 +35,18 @@
 
 #if ROBOT_CLASS == 1
 //--------------------------------- Encoders ---------------------------------
-    #define LEFT_ENCODER_A GPIO_NUM_4
-    #define LEFT_ENCODER_B GPIO_NUM_34
+    #define LEFT_ENCODER_A GPIO_NUM_27
+    #define LEFT_ENCODER_B GPIO_NUM_26
 
-    #define RIGHT_ENCODER_A GPIO_NUM_19
-    #define RIGHT_ENCODER_B GPIO_NUM_21
+    #define RIGHT_ENCODER_A GPIO_NUM_12
+    #define RIGHT_ENCODER_B GPIO_NUM_14
 
 //--------------------------------- Motors ---------------------------------
-    #define LEFT_MOTOR_DIR GPIO_NUM_32
-    #define LEFT_MOTOR_PWM GPIO_NUM_27
+    #define LEFT_MOTOR_DIR GPIO_NUM_5
+    #define LEFT_MOTOR_PWM GPIO_NUM_17
 
-    #define RIGHT_MOTOR_DIR GPIO_NUM_33
-    #define RIGHT_MOTOR_PWM GPIO_NUM_13
+    #define RIGHT_MOTOR_DIR GPIO_NUM_19
+    #define RIGHT_MOTOR_PWM GPIO_NUM_18
 
 #elif ROBOT_CLASS == 2
 

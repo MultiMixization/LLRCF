@@ -55,12 +55,12 @@
         #define FR_FLIP_DIRECTION false     // Set to true to reverse the clockwise/counterclockwise sense for front right wheel.
         #define RL_FLIP_DIRECTION true      // Set to true to reverse the clockwise/counterclockwise sense for rear left wheel.
         #define RR_FLIP_DIRECTION false     // Set to true to reverse the clockwise/counterclockwise sense for rear right wheel.
-        #define STEERING_FLIP_DIRECTION true
+        #define STEERING_FLIP_DIRECTION false
 
-        #define FL_ENCODER_STEPS 4096.0
-        #define FR_ENCODER_STEPS 1024.0
-        #define RL_ENCODER_STEPS 4096.0
-        #define RR_ENCODER_STEPS 1024.0
+        #define FL_ENCODER_STEPS 2048.0
+        #define FR_ENCODER_STEPS 512.0
+        #define RL_ENCODER_STEPS 2048.0
+        #define RR_ENCODER_STEPS 512.0
     #endif
 
     #define RATIO 1.7778            //Ratio between motor and wheel (9.7800 for new robot, 1.7778 for old one).

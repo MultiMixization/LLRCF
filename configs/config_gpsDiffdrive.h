@@ -63,7 +63,7 @@
         #define RR_ENCODER_STEPS 1024.0
     #endif
 
-    #define RATIO 1.7778            //Ratio between motor and wheel (9.7800 for new robot, 1.7778 for old one).
+    #define RATIO 9.7800            //Ratio between motor and wheel (9.7800 for new robot, 1.7778 for old one).
 
     // ----- PID SETTINGS ----- //
 

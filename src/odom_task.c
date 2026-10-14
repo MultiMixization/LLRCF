@@ -131,6 +131,10 @@ extern OpSys SystemHandles;
         wheel_size = 2.0 * M_PI * constantsDataStruct.wheel_size;
         front_wheel_longitudinal_distance = constantsDataStruct.wheel_longitudinal_distance;
 
+        xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
+            mainDataStruct.pos_z = constantsDataStruct.wheel_size;
+        xSemaphoreGive(SystemHandles.RobotDataAccess);
+
         AS5040_info angle_sensor = {
             .pin_clk = ANGLE_SENSOR_CLK,
             .pin_cs = ANGLE_SENSOR_CS,
@@ -188,7 +192,6 @@ extern OpSys SystemHandles;
             rot_diff = avg_back_speed * tan(mainDataStruct.steering_position) / front_wheel_longitudinal_distance / ODOM_TASK_FREQ;
 
             Quaternion_toEulerZYX(&mainDataStruct.orientation, curr_eul);
-            Quaternion_setIdentity(&rot_diff_quat);
             Quaternion_fromZRotation(rot_diff, &rot_diff_quat);
 
             mainDataStruct.pos_x += avg_back_speed * cos(curr_eul[2] + rot_diff) / ODOM_TASK_FREQ;

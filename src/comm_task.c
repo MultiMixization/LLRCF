@@ -213,6 +213,10 @@ void comm_task()
                         xSemaphoreGive(SystemHandles.ConstantDataAccess);
                         saveConstantsToFlash();
                     }
+                    else
+                    {
+                        sprintf(outputFrame, "Unknown argument value: %ld\n", strtol(temp1, NULL, 10));
+                    }
                 }
                 else if (strcmp(cmd, "CKI") == 0)                   /** Change value of I coefficient for angle or speed controling PID controller. */
                 {
@@ -237,6 +241,10 @@ void comm_task()
                         #endif
                         xSemaphoreGive(SystemHandles.ConstantDataAccess);
                         saveConstantsToFlash();
+                    }
+                    else
+                    {
+                        sprintf(outputFrame, "Unknown argument value: %ld\n", strtol(temp1, NULL, 10));
                     }
                 }
                 else if (strcmp(cmd, "CKD") == 0)                   /** Change value of D coefficient for angle or speed controling PID controller. */
@@ -263,6 +271,10 @@ void comm_task()
                         xSemaphoreGive(SystemHandles.ConstantDataAccess);
                         saveConstantsToFlash();
                     } 
+                    else
+                    {
+                        sprintf(outputFrame, "Unknown argument value: %ld\n", strtol(temp1, NULL, 10));
+                    }
                 }
                 else if (strcmp(cmd, "WHD") == 0)                   /** Change wheel size. */
                 {
@@ -353,9 +365,9 @@ void comm_task()
                 {
                     strncpy(temp1, inputData + 7, 6);
                     strncpy(temp2, inputData + 14, 6);
-                    strncpy(&temp3, inputData + 21, 1);
                     #if ACCESORY_1_TYPE != 0
-                    gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
+                        strncpy(&temp3, inputData + 21, 1);
+                        gpio_set_level(ACCESORY_PORT_1, !((bool)strtol(&temp3, NULL, 10)));
                     #endif
                     xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
                     xSemaphoreTake(SystemHandles.ConstantDataAccess, portMAX_DELAY);
@@ -367,7 +379,7 @@ void comm_task()
                     mainDataStruct.RL_target_speed = target_speed * (turning_radius - constantsDataStruct.wheel_separation * 0.5) / turning_radius;
                     mainDataStruct.RR_target_speed = target_speed * (turning_radius + constantsDataStruct.wheel_separation * 0.5) / turning_radius;
                     xSemaphoreGive(SystemHandles.ConstantDataAccess);
-                    sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
+                    sprintf(outputFrame, "RD;%6.2f;%6.2f;%6.3f;%6.2f;%6.2f;%6.2f;%6.2f\n", mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
                     xSemaphoreGive(SystemHandles.RobotDataAccess);
                 }
                 #else
@@ -378,7 +390,7 @@ void comm_task()
         else                                                        /** Default - no command, only send data. */
         {
             xSemaphoreTake(SystemHandles.RobotDataAccess, portMAX_DELAY);
-            sprintf(outputFrame, "%s;%6.2f;%6.2f;%6.2f;%6.3f;%6.3f;%6.3f;%6.3f\n", ROBOT_ID, mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
+            sprintf(outputFrame, "%s;%6.2f;%6.2f;%6.3f;%6.2f;%6.2f;%6.2f;%6.2f\n", ROBOT_ID, mainDataStruct.pos_x, mainDataStruct.pos_y, mainDataStruct.pos_z, mainDataStruct.orientation.v[0], mainDataStruct.orientation.v[1], mainDataStruct.orientation.v[2], mainDataStruct.orientation.w);
             xSemaphoreGive(SystemHandles.RobotDataAccess);
         }
         uart_write_bytes(UART_PORT_NUM, outputFrame, strlen(outputFrame));
@@ -391,6 +403,9 @@ void comm_task()
             uart_write_bytes(UART_PORT_NUM, outputFrame, strlen(outputFrame));
         }
         xSemaphoreGive(SystemHandles.OpSysAccess);
+
+        memset(temp1, 0, sizeof(temp1));
+        memset(temp2, 0, sizeof(temp2));
         
         xTaskDelayUntil(&SystemHandles.comm_last_wakeup, pdMS_TO_TICKS(1000 / COMM_TASK_FREQ));
     }

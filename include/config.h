@@ -22,7 +22,7 @@
     *   1   -   Class (2, 0)
     *   2   -   Class (1, 1)
     */
-    #define ROBOT_CLASS 2
+    #define ROBOT_CLASS 1
 
     /*
     *   You need to declare what kind of motor drivers the robot uses.
@@ -55,7 +55,7 @@
         #define FR_FLIP_DIRECTION false     // Set to true to reverse the clockwise/counterclockwise sense for front right wheel.
         #define RL_FLIP_DIRECTION true      // Set to true to reverse the clockwise/counterclockwise sense for rear left wheel.
         #define RR_FLIP_DIRECTION false     // Set to true to reverse the clockwise/counterclockwise sense for rear right wheel.
-        #define STEERING_FLIP_DIRECTION false
+        #define STEERING_FLIP_DIRECTION true
 
         #define FL_ENCODER_STEPS 4096.0
         #define FR_ENCODER_STEPS 1024.0
@@ -63,7 +63,7 @@
         #define RR_ENCODER_STEPS 1024.0
     #endif
 
-    #define RATIO 1.7778            //Ratio between motor and wheel (9.7800 for new robot, 1.7778 for old one).
+    #define RATIO 9.7800           //Ratio between motor and wheel (9.7800 for new robot, 1.7778 for old one).
 
     // ----- PID SETTINGS ----- //
 
@@ -98,7 +98,7 @@
     #define ACCESORY_1_BASE_STATE 1 //Starting state of the pin controlling the accesory 1
     //#define ACCESORY_2_BASE_STATE 1 //Starting state of the pin controlling the accesory 2
 
-    #define SAFETY_SWITCH           //Uncomment if the robot is equipped with a safety switch connected to the microcontroller.
+    //#define SAFETY_SWITCH
     #ifdef SAFETY_SWITCH
         //#define SAFETY_SWITCH_INVERT    //Uncomment if the logic of the safety switch is inverted.
     #endif

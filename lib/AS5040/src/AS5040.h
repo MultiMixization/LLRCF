@@ -18,15 +18,20 @@
 
 /**
  * @struct AS5040_info
- * @brief Struct representing the current state of device.
+ * @brief Struct representing the current state of device.  
+ * @var gpio_num_t::pin_clk
+ * @var gpio_num_t::pin_data 
+ * @var gpio_num_t::pin_cs 
+ * @var float::offset
+ * @var bool::invert_reading
  */
 typedef struct
 {
-    gpio_num_t pin_clk;
-    gpio_num_t pin_data;
-    gpio_num_t pin_cs;
-    float offset;
-    bool invert_reading;
+    gpio_num_t pin_clk;         ///< Pin identifier for the clock line.
+    gpio_num_t pin_data;        ///< Pin identifier for the data line.
+    gpio_num_t pin_cs;          ///< Pin identifier for the chip select line.
+    float offset;               ///< Offset between the read position and returned by the sensor measured in radians.
+    bool invert_reading;        ///< True if the sensor returns increasing values rotating clockwise.
 }AS5040_info;
 
 /**
